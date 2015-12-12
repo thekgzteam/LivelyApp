@@ -1,21 +1,28 @@
 {
-  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "E417FB209D626755C5BFBC5DD0EC93D644EE7E6B",
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "0B20B7CAA1455282DA41F2039C8A2E837CEE3545",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
 
   },
   "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
     "CB21A6BEB2AD8E280F6C564828C9A6D207AE4FBB" : 0,
-    "E417FB209D626755C5BFBC5DD0EC93D644EE7E6B" : 0
+    "E417FB209D626755C5BFBC5DD0EC93D644EE7E6B" : 0,
+    "0B20B7CAA1455282DA41F2039C8A2E837CEE3545" : 0
   },
   "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "01D456EE-3752-498E-AFA5-DE299A8650D7",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
     "CB21A6BEB2AD8E280F6C564828C9A6D207AE4FBB" : "",
-    "E417FB209D626755C5BFBC5DD0EC93D644EE7E6B" : "New%20Video%20Chat%20Project\/"
+    "E417FB209D626755C5BFBC5DD0EC93D644EE7E6B" : "New%20Video%20Chat%20Project\/",
+    "0B20B7CAA1455282DA41F2039C8A2E837CEE3545" : "MyScene\/"
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "New Video Chat Project",
   "DVTSourceControlWorkspaceBlueprintVersion" : 204,
   "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "New Video Chat Project.xcworkspace",
   "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/thekgzteam\/LivelyApp.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "0B20B7CAA1455282DA41F2039C8A2E837CEE3545"
+    },
     {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/thekgzteam\/MyScene.git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
