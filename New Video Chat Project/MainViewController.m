@@ -37,7 +37,7 @@
 @property (strong, nonatomic) UINavigationController *nav;
 @property (weak, nonatomic) QBRTCSession *currentSession;
 @property (weak, nonatomic) QBRTCSession *sessionToAccept;
-
+@property MainTableViewCell *mainVcCell;
 
 @property (weak, nonatomic) IBOutlet UILabel *allTextsButtonAndNumberOfDialogs;
 @property BOOL isOnline;
@@ -471,6 +471,7 @@
         self.sessionToAccept = session;
         [cell.layer addAnimation:[self isLiveAnimation] forKey:@"isLiveAnimation"];
         cell.isLiveIndicator.hidden = false;
+    self.mainVcCell.isLiveIndicator.hidden = false;
         [SVProgressHUD showSuccessWithStatus:@"call is coming"];
         [self.tableView reloadData];
 //    }

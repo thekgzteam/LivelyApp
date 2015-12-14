@@ -179,6 +179,11 @@
 
 }
 
+- (BOOL) shouldRemovePresentersView {
+    return YES;
+}
+
+
 -(void) perform:(id)sender {
 
     [self dismissViewControllerAnimated:YES completion:^{

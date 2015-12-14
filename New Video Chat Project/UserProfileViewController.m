@@ -71,6 +71,10 @@
     self.view.frame = CGRectMake (60,157, 280.f, 370.f);
     
 }
+- (BOOL) shouldRemovePresentersView {
+    return YES;
+}
+
 - (IBAction)onDismissButtonPressed:(id)sender {
     [self dismissViewControllerAnimated:YES completion:^{
     }];

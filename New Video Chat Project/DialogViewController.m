@@ -47,6 +47,7 @@
 @property  UIImagePickerController* pickerController;
 @property UIImage *image;
 @property (weak, nonatomic) IBOutlet UITextView *chatTextView;
+@property UserIsTypingCell *typingCell;
 
 @property (strong,nonatomic) ContentView *handler;
 @property (weak, nonatomic) IBOutlet UIView *viewForTableCellFadeEffect;
@@ -186,6 +187,7 @@
     UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(visualEffectTapped:)];
     tapRecognizer.numberOfTapsRequired = 1;
     [self.tableView addGestureRecognizer:tapRecognizer];
+    [self.opponentsView addGestureRecognizer:tapRecognizer];
 
     UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveViewWithGestureRecognizer:)];
     [self.oponentVIew addGestureRecognizer:panGestureRecognizer];
@@ -212,7 +214,6 @@
         }
 
         [SVProgressHUD showSuccessWithStatus:@"user started typing"];
-
         [weakSelf.messageArray addObject:@0];
 
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:weakSelf.messageArray.count -1 inSection:0];
@@ -230,6 +231,7 @@
         [weakSelf.messageArray removeObject:@0];
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:weakSelf.messageArray.count inSection:0];
         [weakSelf.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationTop];
+        [weakSelf.tableView reloadData];
     }];
 }
 
@@ -292,6 +294,7 @@
     if ([self.tableView isFirstResponder] && [touch view] != self.tableView)
         [self.tableView resignFirstResponder];
     [super touchesBegan:touches withEvent:event];
+
 }
 
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
@@ -304,11 +307,12 @@
 - (BOOL)textViewShouldEndEditing:(UITextView *)textView{
     [self.userDialogs sendUserStoppedTyping];
 
+    [self scrollTableViewUp];
+
     return YES;
 }
 
 - (void)textViewDidChange:(UITextView *)textView {
-    [self scrollTableViewUp];
 
 }
 
@@ -319,8 +323,7 @@
 }
 
 - (void)textViewDidBeginEditing:(UITextView *)textView {
-    [self scrollTableViewUp];
-
+    [self.typingCell.customView startAllAnimations:textView];
 }
 
 - (void)textViewDidEndEditing:(UITextView *)textView {
@@ -694,9 +697,18 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 
+
+    self.chatTextView.delegate = self;
+
     // CELLS THAT APPEARS WHEN USER STARTS TYPING
     if ([[self.messageArray objectAtIndex:indexPath.row] isEqual:@0]) {
         UserIsTypingCell *cell = [tableView dequeueReusableCellWithIdentifier:@"useristyping"];
+        cell.backgroundColor = cell.contentView.backgroundColor;
+        [cell reloadInputViews];
+//        NSIndexPath* rowToReload = [NSIndexPath indexPathForRow:3 inSection:0];
+//        NSArray* rowsToReload = [NSArray arrayWithObjects:rowToReload, nil];
+//        [myUITableView reloadRowsAtIndexPaths:rowsToReload withRowAnimation:UITableViewRowAnimationNone];
+
         return cell;
     }
 
@@ -818,7 +830,7 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
 
     if ([[self.messageArray objectAtIndex:indexPath.row] isEqual:@0]){
-        return 38;
+        return 60;
     }
     QBChatMessage *messageHistory = [self.messageArray objectAtIndex:indexPath.row];
     NSString * yourText = messageHistory.text;

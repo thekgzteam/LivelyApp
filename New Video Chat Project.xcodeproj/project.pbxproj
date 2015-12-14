@@ -494,8 +494,6 @@
 				FD6600231BE0169500C1B4A1 /* ProfileViewController.m */,
 				FD07AA191BE174E3005EB685 /* ProfileSettingsViewController.h */,
 				FD07AA1A1BE174E3005EB685 /* ProfileSettingsViewController.m */,
-				FD2C80491BF726310064CC34 /* UserProfileViewController.h */,
-				FD2C804A1BF726310064CC34 /* UserProfileViewController.m */,
 			);
 			name = "Profilve VC's";
 			sourceTree = "<group>";
@@ -505,6 +503,8 @@
 			children = (
 				FD66FFBD1BDBAEEC00C1B4A1 /* ContactsAndGroups.h */,
 				FD66FFBE1BDBAEEC00C1B4A1 /* ContactsAndGroups.m */,
+				FD2C80491BF726310064CC34 /* UserProfileViewController.h */,
+				FD2C804A1BF726310064CC34 /* UserProfileViewController.m */,
 			);
 			name = ContactsAndGroupsVC;
 			sourceTree = "<group>";

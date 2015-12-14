@@ -50,10 +50,6 @@
     self.preferredContentSize = size;
 
     [self.dismissButton.layer addAnimation:[self imageAnimation] forKey:@"imageAnimation"];
-}
-
--(void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
 
     [self.userProfileImage.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
     [self.userProfileImage.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
@@ -72,10 +68,14 @@
     [self.addParticipantsButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
 }
 
+-(void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+
+}
+
 - (IBAction)onDismissButtonPressed:(id)sender {
     [self dismissViewControllerAnimated:YES completion:^{
     }];
-
 }
 
 - (CABasicAnimation*)imageAnimation{

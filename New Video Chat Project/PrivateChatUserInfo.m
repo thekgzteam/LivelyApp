@@ -19,6 +19,23 @@
     self.preferredContentSize = size;
     self.view.center = CGPointMake(100, 100);
 
+    [self.userProfileImage.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
+    [self.userProfileImage.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
+    [self.userProfileImage.layer addAnimation:[self rotationAnimation] forKey:@"rotationAnimation"];
+    [self.name.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
+    [self.name.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
+    [self.mediaCount.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
+    [self.mediaCount.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
+    [self.collectionView.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
+    [self.collectionView.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
+    [self.tableView.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
+    [self.tableView.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
+    [self.allMediaLabel.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
+    [self.allMediaLabel.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
+    [self.userInfoandActionsLabel.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
+    [self.userInfoandActionsLabel.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
+
+
     [self.dismissButton.layer addAnimation:[self imageAnimation] forKey:@"imageAnimation"];
 }
 
@@ -51,26 +68,6 @@
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    [self.userProfileImage.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
-    [self.userProfileImage.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
-    [self.userProfileImage.layer addAnimation:[self rotationAnimation] forKey:@"rotationAnimation"];
-     [self.name.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
-    [self.name.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
-    [self.mediaCount.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
-    [self.mediaCount.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
-    [self.collectionView.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
-    [self.collectionView.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
-    [self.tableView.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
-    [self.tableView.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
-    [self.allMediaLabel.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
-    [self.allMediaLabel.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
-    [self.userInfoandActionsLabel.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
-    [self.userInfoandActionsLabel.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
-
-
-
-
-
 
 }
 
