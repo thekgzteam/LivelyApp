@@ -35,7 +35,6 @@
 		FD2C804B1BF726310064CC34 /* UserProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD2C804A1BF726310064CC34 /* UserProfileViewController.m */; settings = {ASSET_TAGS = (); }; };
 		FD32C94C1BD7A8EC0098E0DF /* PresentingAnimationController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD32C9491BD7A8EC0098E0DF /* PresentingAnimationController.m */; settings = {ASSET_TAGS = (); }; };
 		FD32C94D1BD7A8EC0098E0DF /* DismissingAnimationController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD32C94B1BD7A8EC0098E0DF /* DismissingAnimationController.m */; settings = {ASSET_TAGS = (); }; };
-		FD38D25F1BD0D7F10042EA83 /* TextTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD38D25E1BD0D7F10042EA83 /* TextTableViewCell.m */; settings = {ASSET_TAGS = (); }; };
 		FD3DFD281BF6B0E300E93192 /* CreatGroupVC.m in Sources */ = {isa = PBXBuildFile; fileRef = FD3DFD251BF6B0E300E93192 /* CreatGroupVC.m */; settings = {ASSET_TAGS = (); }; };
 		FD3DFD291BF6B0E300E93192 /* ContactListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD3DFD271BF6B0E300E93192 /* ContactListViewController.m */; settings = {ASSET_TAGS = (); }; };
 		FD3DFD301BF6B22400E93192 /* UsersPaginator.m in Sources */ = {isa = PBXBuildFile; fileRef = FD3DFD2B1BF6B22400E93192 /* UsersPaginator.m */; settings = {ASSET_TAGS = (); }; };
@@ -43,6 +42,7 @@
 		FD3DFD321BF6B22400E93192 /* Storage.m in Sources */ = {isa = PBXBuildFile; fileRef = FD3DFD2F1BF6B22400E93192 /* Storage.m */; settings = {ASSET_TAGS = (); }; };
 		FD455A981BE0855E000B181A /* ProfileMenuTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD455A971BE0855E000B181A /* ProfileMenuTableViewCell.m */; settings = {ASSET_TAGS = (); }; };
 		FD5411321C0F5F8F0072780B /* OpponentCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5411311C0F5F8F0072780B /* OpponentCollectionViewCell.m */; settings = {ASSET_TAGS = (); }; };
+		FD549A471C1D55C5000199E5 /* ContentView.m in Sources */ = {isa = PBXBuildFile; fileRef = FD549A461C1D55C5000199E5 /* ContentView.m */; settings = {ASSET_TAGS = (); }; };
 		FD5C1BD71C154DED00BD52B0 /* DIalogSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5C1BD61C154DED00BD52B0 /* DIalogSettingViewController.m */; settings = {ASSET_TAGS = (); }; };
 		FD5F09221C09F65A00737225 /* GroupChatInfoPopOver.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5F09211C09F65A00737225 /* GroupChatInfoPopOver.m */; settings = {ASSET_TAGS = (); }; };
 		FD5F09281C0A8CEF00737225 /* AllMediaCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5F09271C0A8CEF00737225 /* AllMediaCollectionViewCell.m */; settings = {ASSET_TAGS = (); }; };
@@ -133,7 +133,6 @@
 		FD03AC0E1BEBD15B0077CD61 /* Types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Types.h; sourceTree = "<group>"; };
 		FD07AA191BE174E3005EB685 /* ProfileSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProfileSettingsViewController.h; path = ../ProfileSettingsViewController.h; sourceTree = "<group>"; };
 		FD07AA1A1BE174E3005EB685 /* ProfileSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ProfileSettingsViewController.m; path = ../ProfileSettingsViewController.m; sourceTree = "<group>"; };
-		FD07AC3B1BE5B880005EB685 /* Config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		FD0D18491BF1362A0034FDC1 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		FD0D184A1BF1362A0034FDC1 /* pop-ios-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "pop-ios-Info.plist"; sourceTree = "<group>"; };
 		FD0D184B1BF1362A0034FDC1 /* pop-osx-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "pop-osx-Info.plist"; sourceTree = "<group>"; };
@@ -200,8 +199,6 @@
 		FD32C9491BD7A8EC0098E0DF /* PresentingAnimationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PresentingAnimationController.m; sourceTree = "<group>"; };
 		FD32C94A1BD7A8EC0098E0DF /* DismissingAnimationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DismissingAnimationController.h; sourceTree = "<group>"; };
 		FD32C94B1BD7A8EC0098E0DF /* DismissingAnimationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DismissingAnimationController.m; sourceTree = "<group>"; };
-		FD38D25D1BD0D7F10042EA83 /* TextTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextTableViewCell.h; sourceTree = "<group>"; };
-		FD38D25E1BD0D7F10042EA83 /* TextTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextTableViewCell.m; sourceTree = "<group>"; };
 		FD3DFD241BF6B0E300E93192 /* CreatGroupVC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreatGroupVC.h; sourceTree = "<group>"; };
 		FD3DFD251BF6B0E300E93192 /* CreatGroupVC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CreatGroupVC.m; sourceTree = "<group>"; };
 		FD3DFD261BF6B0E300E93192 /* ContactListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContactListViewController.h; sourceTree = "<group>"; };
@@ -216,6 +213,8 @@
 		FD455A971BE0855E000B181A /* ProfileMenuTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProfileMenuTableViewCell.m; sourceTree = "<group>"; };
 		FD5411301C0F5F8F0072780B /* OpponentCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpponentCollectionViewCell.h; sourceTree = "<group>"; };
 		FD5411311C0F5F8F0072780B /* OpponentCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpponentCollectionViewCell.m; sourceTree = "<group>"; };
+		FD549A451C1D55C5000199E5 /* ContentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContentView.h; sourceTree = "<group>"; };
+		FD549A461C1D55C5000199E5 /* ContentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContentView.m; sourceTree = "<group>"; };
 		FD5C1BD51C154DED00BD52B0 /* DIalogSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DIalogSettingViewController.h; sourceTree = "<group>"; };
 		FD5C1BD61C154DED00BD52B0 /* DIalogSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DIalogSettingViewController.m; sourceTree = "<group>"; };
 		FD5F09201C09F65A00737225 /* GroupChatInfoPopOver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GroupChatInfoPopOver.h; sourceTree = "<group>"; };
@@ -513,6 +512,8 @@
 		FD0E09151BFAF21D00A768D4 /* DIalogVC */ = {
 			isa = PBXGroup;
 			children = (
+				FD549A451C1D55C5000199E5 /* ContentView.h */,
+				FD549A461C1D55C5000199E5 /* ContentView.m */,
 				FD691DB61BE886BF003D56FC /* DialogViewController.h */,
 				FD691DB71BE886BF003D56FC /* DialogViewController.m */,
 				FD5C1BD51C154DED00BD52B0 /* DIalogSettingViewController.h */,
@@ -530,7 +531,6 @@
 		FD0E09161BFAF25E00A768D4 /* ConfigurationVC's */ = {
 			isa = PBXGroup;
 			children = (
-				FD07AC3B1BE5B880005EB685 /* Config.h */,
 				FD03AC0E1BEBD15B0077CD61 /* Types.h */,
 				FD71D1C71BCCE6530056EA7F /* AppDelegate.h */,
 				FD71D1C81BCCE6530056EA7F /* AppDelegate.m */,
@@ -592,8 +592,6 @@
 				FD0E090B1BF9E4C400A768D4 /* OutgointTableViewCell.m */,
 				FD71D2531BD0487D0056EA7F /* MainTableViewCell.h */,
 				FD71D2541BD0487D0056EA7F /* MainTableViewCell.m */,
-				FD38D25D1BD0D7F10042EA83 /* TextTableViewCell.h */,
-				FD38D25E1BD0D7F10042EA83 /* TextTableViewCell.m */,
 				FD66001F1BDEFF7000C1B4A1 /* ContactsAndGroupsTableViewCell.h */,
 				FD6600201BDEFF7000C1B4A1 /* ContactsAndGroupsTableViewCell.m */,
 				FD455A961BE0855E000B181A /* ProfileMenuTableViewCell.h */,
@@ -885,10 +883,10 @@
 				FD7013551BFFB80100D81F44 /* IncomingViewController.m in Sources */,
 				FD0D18851BF1362A0034FDC1 /* POPAnimationExtras.mm in Sources */,
 				FD6600211BDEFF7100C1B4A1 /* ContactsAndGroupsTableViewCell.m in Sources */,
+				FD549A471C1D55C5000199E5 /* ContentView.m in Sources */,
 				FD0D188D1BF1362A0034FDC1 /* POPGeometry.mm in Sources */,
 				FD0D18931BF1362A0034FDC1 /* TransformationMatrix.cpp in Sources */,
 				FDAE6C2D1C07D20B00399489 /* UserIsTypingCell.m in Sources */,
-				FD38D25F1BD0D7F10042EA83 /* TextTableViewCell.m in Sources */,
 				FD0E090F1BFADD4200A768D4 /* ContactListTableViewCell.m in Sources */,
 				FD5F09401C0AB85900737225 /* PrivateChatUserInfo.m in Sources */,
 				FD07AA1B1BE174E3005EB685 /* ProfileSettingsViewController.m in Sources */,
@@ -1076,6 +1074,7 @@
 			baseConfigurationReference = 6321B8E4EB3EA1A3AEE14DD4 /* Pods-New Video Chat Project.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = BrandAsset;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -1110,6 +1109,7 @@
 			baseConfigurationReference = D502ED263FA04957F5B13054 /* Pods-New Video Chat Project.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = BrandAsset;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: Edil Ashimov (LX84G6PTJX)";
 				ENABLE_BITCODE = NO;

@@ -14,4 +14,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *profileName;
 @property (weak, nonatomic) IBOutlet UILabel *textMessage;
 @property (weak, nonatomic) IBOutlet UILabel *unreadMessagesCountLabel;
+@property (weak, nonatomic) IBOutlet UIButton *isLiveIndicator;
+
+
 @end

@@ -35,7 +35,9 @@
     border.borderWidth = borderWidth;
     [self.usernameTextfield.layer addSublayer:border];
     self.usernameTextfield.layer.masksToBounds = YES;
-    self.loginButton.layer.cornerRadius = 15;
+
+    self.usernameTextfield.layer.masksToBounds = YES;
+    self.loginButton.layer.cornerRadius = 20;
     self.loginButton.layer.masksToBounds = YES;
 
     self.dismissViewButton.layer.cornerRadius = 15;
@@ -43,6 +45,13 @@
 
 
 }
+
+-(void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+
+    self.view.frame = CGRectMake (60,157, 280.f, 370.f);
+}
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 
     UITouch *touch = [[event allTouches] anyObject];
@@ -99,6 +108,7 @@
     if ([segue.identifier isEqualToString:@"usernameEntered"]){
         MainViewController  *vc = [segue destinationViewController];
         vc.myUserId = self.usernameTextfield.text;
+       
     }
 }
 

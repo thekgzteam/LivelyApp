@@ -36,6 +36,11 @@
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *EditDialogsBarButton;
 @property (strong, nonatomic) UINavigationController *nav;
 @property (weak, nonatomic) QBRTCSession *currentSession;
+@property (weak, nonatomic) QBRTCSession *sessionToAccept;
+
+
+@property (weak, nonatomic) IBOutlet UILabel *allTextsButtonAndNumberOfDialogs;
+@property BOOL isOnline;
 
 @end
 
@@ -44,7 +49,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-#pragma mark -  NSNOTIFICATIONS 
+    self.isOnline = false;
+
+#pragma mark -  NSNOTIFICATIONS
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(receiveReloadTableViewNotification:)
@@ -57,7 +64,19 @@
 #pragma mark - UI DESIGN -
 
     // WRITE NEW MESSAGE CUSTOM BUTTON
-    self.writeNewMessage.layer.cornerRadius= 30;
+
+  CGRect frame = CGRectMake(0,0, 200, 50);
+    UIView *customView;
+    customView.frame = frame;
+    self.nav.navigationItem.titleView.frame =frame;
+    [self.nav.navigationItem.titleView sizeToFit];
+    
+    self.navigationItem.titleView.frame = frame;
+    self.navigationController.navigationItem.titleView.frame = frame;
+
+
+
+    self.writeNewMessage.layer.cornerRadius = 30;
     self.writeNewMessage.layer.masksToBounds = YES;
     self.writeNewMessage.layer.borderColor=[[UIColor redColor] CGColor];
     [self.writeNewMessage.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
@@ -73,9 +92,9 @@
     // REQUEST FOR COUNT OF DIALOGS
     [QBRequest countOfDialogsWithExtendedRequest:nil successBlock:^(QBResponse *response, NSUInteger count) {
         NSString *integerAsString = [@(count) stringValue];
-        NSString *numberOfDialogs = [NSString stringWithFormat:@"(%@)", integerAsString];
-        self.numberOfDialogs.text = numberOfDialogs;
-    } errorBlock:^(QBResponse *response) {
+        NSString *numberOfDialogs = [NSString stringWithFormat:@"All Texts (%@)", integerAsString];
+        self.allTextsButtonAndNumberOfDialogs.text = numberOfDialogs;
+            } errorBlock:^(QBResponse *response) {
     }];
         [self loadDialogs];
 }
@@ -174,11 +193,23 @@
     NSString *dialogCreatedDate = [formatter2 stringFromDate:allDialogs.createdAt];
 
     NSString *result = [formatter stringFromDate:allDialogs.lastMessageDate];
-    switch (allDialogs.type) {
+
+       switch (allDialogs.type) {
         case QBChatDialogTypeGroup: {
+
+            [QBRequest downloadFileWithUID:allDialogs.photo successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
+
+//                cell.profileImage.image = [UIImage imageWithData:fileData];
+                   cell.profileImage.image = [UIImage imageNamed:@"group icon-1"];
+
+            } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
+                nil;
+            } errorBlock:nil];
+        };
+//               cell.profileImage.image = [UIImage imageNamed:@"group icon-1"];
+
             cell.profileName.text = allDialogs.name;
             cell.textMessage.text = allDialogs.lastMessageText;
-            cell.profileImage.image = [UIImage imageNamed:@"group icon-1"];
 
             if ([result isEqualToString:@"Today"]) {
                 cell.timeOfMessage.text = startTimeString;
@@ -187,9 +218,9 @@
                 cell.timeOfMessage.text = dialogCreatedDate;
 
             } else {
-            cell.timeOfMessage.text = result;
-        }
-            break;
+                cell.timeOfMessage.text = result;
+
+        break;
         case QBChatDialogTypePrivate: {
 
             NSMutableArray *occID = [[NSMutableArray alloc]initWithArray:allDialogs.occupantIDs];
@@ -315,6 +346,10 @@
     }
 }
 
+- (NSString *)senderDisplayName {
+    return [QBSession currentSession].currentUser.fullName;
+}
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
     NSIndexPath *selectedIndexPath = [self.tableView indexPathForSelectedRow];
@@ -323,6 +358,17 @@
     self.imageToDialogVC = cell.profileImage.image;
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     self.userDialogToBePassed = self.textMessages[indexPath.row];
+
+
+
+    if (self.isOnline == true) {
+        NSDictionary *userInfo = @{ @"key" : @"value" };
+
+        [self.sessionToAccept acceptCall:userInfo];
+        [self performSegueWithIdentifier:@"openDialogSeg" sender:self];
+
+    } else if (self.isOnline == false) {
+
 
 #pragma mark - MAKING A VIDEO CALL
     NSMutableArray *opponentsIDs = [self.userDialogToBePassed.occupantIDs mutableCopy];
@@ -342,14 +388,19 @@
     NSDictionary *userInfo = @{ @"key" : @"value" };
     [session startCall:userInfo];
     if (session) {
+        
         self.currentSession = session;
+        self.sessionToAccept = session;
+        [QBRequest sendPushWithText:[[self senderDisplayName] stringByAppendingString:@" is Live 🎥 "] toUsers:[opponentsIDs mutableCopy] successBlock:nil errorBlock:^(QBError *error) {
+        }];
+
         [self performSegueWithIdentifier:@"openDialogSeg" sender:self];
     }
     else {
         [SVProgressHUD showErrorWithStatus:@"You should login to use chat API. Session hasn’t been created. Please try to relogin the chat."];
     }
+    }
 }
-
 #pragma mark - SEGUES -
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
@@ -360,6 +411,7 @@
         dvc.userDialogs = self.userDialogToBePassed;
         dvc.session = self.currentSession;
         dvc.imageForRightBar = self.imageToDialogVC;
+        dvc.session = self.sessionToAccept;
     }
 }
 
@@ -375,6 +427,19 @@
     transformAnim.removedOnCompletion = NO;
 
     return transformAnim;
+}
+
+
+- (CABasicAnimation*)isLiveAnimation{
+    CABasicAnimation * fillColorAnim = [CABasicAnimation animationWithKeyPath:@"fillColor"];
+    fillColorAnim.toValue            = (id)[UIColor colorWithRed:0.0755 green: 0.922 blue:0 alpha:1].CGColor;
+    fillColorAnim.duration           = 0.733;
+    fillColorAnim.autoreverses       = YES;
+    fillColorAnim.fillMode = kCAFillModeForwards;
+    fillColorAnim.removedOnCompletion = NO;
+    fillColorAnim.repeatCount = 200;
+
+    return fillColorAnim;
 }
 
 #pragma mark - UIVIEWCONTROLLER TRANSITION DELEGATE METHODS
@@ -393,36 +458,39 @@
 - (void)didReceiveNewSession:(QBRTCSession *)session userInfo:(NSDictionary *)userInfo {
 
 
-    if (self.currentSession) {
-        [SVProgressHUD showSuccessWithStatus:@"recieved current session"];
-        [session rejectCall:@{@"reject" : @"busy"}];
-        return;
-    }
+    NSIndexPath *selectedIndexPath = [self.tableView indexPathForSelectedRow];
+    MainTableViewCell *cell = [self.tableView cellForRowAtIndexPath:selectedIndexPath];
 
-    self.currentSession = session;
-    [SVProgressHUD showSuccessWithStatus:@"call is coming"];
-    //    NSParameterAssert(!self.nav);
-    IncomingViewController *dvc = [self.storyboard instantiateViewControllerWithIdentifier:@"IncomingCallViewController"];
-    dvc.session = self.currentSession;
-    dvc.transitioningDelegate = self;
-    dvc.modalPresentationStyle = UIModalPresentationCustom;
-    [self presentViewController:dvc animated:YES completion:nil];
+//    if (self.currentSession) {
+//        [SVProgressHUD showSuccessWithStatus:@"call is rejected"];
+//        [session rejectCall:@{@"reject" : @"busy"}];
+//        return;
+//    } else {
+        self.isOnline = true;
+        self.currentSession = session;
+        self.sessionToAccept = session;
+        [cell.layer addAnimation:[self isLiveAnimation] forKey:@"isLiveAnimation"];
+        cell.isLiveIndicator.hidden = false;
+        [SVProgressHUD showSuccessWithStatus:@"call is coming"];
+        [self.tableView reloadData];
+//    }
+//                [cell.layer removeAllAnimations];
+//                    self.isOnline = false;
 
+
+//    //    NSParameterAssert(!self.nav);
+//    IncomingViewController *dvc = [self.storyboard instantiateViewControllerWithIdentifier:@"IncomingCallViewController"];
+//    dvc.session = self.currentSession;
+//    dvc.transitioningDelegate = self;
+//    dvc.modalPresentationStyle = UIModalPresentationCustom;
+//    [self presentViewController:dvc animated:YES completion:nil];
+}
+
+-(void)session:(QBRTCSession *)session hungUpByUser:(NSNumber *)userID userInfo:(NSDictionary *)userInfo {
 
 
 }
-
 -(void)sessionDidClose:(QBRTCSession *)session {
-    [SVProgressHUD showSuccessWithStatus:@"session did close"];
 }
-
-- (IBAction)tempAccButton:(id)sender {
-
-    NSDictionary *userInfo = @{ @"key" : @"value" };
-    [self.currentSession acceptCall:userInfo];
-    [self performSegueWithIdentifier:@"openDialogSeg" sender:self];
-    
-}
-
 
 @end

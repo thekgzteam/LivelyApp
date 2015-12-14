@@ -24,11 +24,9 @@
     self.arrowLabel.layer.cornerRadius = 25;
     self.arrowLabel.layer.masksToBounds = YES;
     self.outgoingLabel.layer.cornerRadius = 5;
-    UIView *view = [[UIView alloc]initWithFrame:CGRectMake(220, 8, 270, 28)];
-    [view addSubview:self.outgoingLabel];
 
 
-    [self.outgoingLabel sizeToFit];
+
 
 }
 

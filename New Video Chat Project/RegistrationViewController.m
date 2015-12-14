@@ -151,7 +151,7 @@
         }
 
         //start the verification process with the phonenumber in the field
-        _verification = [SINVerification SMSVerificationWithApplicationKey:@"322dc8c4-3573-4544-9055-7a0fa2721324" phoneNumber:_phoneNumber.text];
+        _verification = [SINVerification SMSVerificationWithApplicationKey:@"bb3898a8-951f-4a43-b857-a66b4546778e" phoneNumber:_phoneNumber.text];
 
         //set up a initiate the process
         [_verification initiateWithCompletionHandler:^(BOOL success, NSError *error) {
@@ -159,10 +159,6 @@
                 [SVProgressHUD showWithStatus:@"Success"];
                 [SVProgressHUD dismiss];
                 self.requestCodeButton.enabled = true ;
-
-
-
-                //                [self performSegueWithIdentifier:@"customModal" sender:nil];
 
                 VerifyCodeViewController *modalVC = [self.storyboard instantiateViewControllerWithIdentifier:@"customModal"];
                 modalVC.transitioningDelegate = self;

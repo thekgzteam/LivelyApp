@@ -21,6 +21,8 @@
     self.unreadMessagesCountLabel.layer.cornerRadius = 10;
     self.unreadMessagesCountLabel.layer.masksToBounds = YES;
 
+    self.isLiveIndicator.hidden = YES;
+
 
 }
 
@@ -43,5 +45,6 @@
         self.unreadMessagesCountLabel.backgroundColor = color;
     }
 }
+
 
 @end

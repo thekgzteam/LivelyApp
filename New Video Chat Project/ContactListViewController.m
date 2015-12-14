@@ -35,8 +35,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-    NSLog(@"----------%@-----", self.uploadImage.image);
+    NSLog(@"-----group image-----%@-----", self.dialogAvatar);
+    
     [[Storage instance].users removeObject:[QBSession currentSession].currentUser];
     self.createButton.enabled = NO;
     self.paginator = [[UsersPaginator alloc] initWithPageSize:10 delegate:self];
@@ -125,17 +125,12 @@
     [QBRequest createDialog:chatDialog successBlock:^(QBResponse *response, QBChatDialog *createdDialog) {
 
         [SVProgressHUD showSuccessWithStatus:@"Dialog Created"];
-        NSData *avatar = [[NSData alloc] initWithData:UIImagePNGRepresentation(self.uploadImage.image)];
-        // Upload a file to the Content module 
-//        NSData *imageData = UIImagePNGRepresentation (self.uploadImage.image);
+        NSData * imageData = UIImageJPEGRepresentation (self.dialogAvatar, 0.15);
 
-        [QBRequest TUploadFile:avatar fileName:@"Dialod Avatar" contentType:@"image/png" isPublic:NO successBlock:^(QBResponse *response, QBCBlob *uploadedBlob) {
-            // set dialog's photo
+        [QBRequest TUploadFile:imageData fileName:@"Dialog Avatar" contentType:@"image/png" isPublic:NO successBlock:^(QBResponse *response, QBCBlob *uploadedBlob) {
+            NSLog(@"-----------Image Uploaded &&& Now Setting The Blob ----------");
             NSUInteger uploadedFileID = uploadedBlob.ID;
-            createdDialog.photo = [NSString stringWithFormat:@"%d", uploadedFileID];
-            
-        } statusBlock:^(QBRequest *request, QBRequestStatus *status) {
-
+            createdDialog.photo = [NSString stringWithFormat:@"%ld", uploadedFileID];
             [QBRequest updateDialog:createdDialog successBlock:^(QBResponse * _Nonnull response, QBChatDialog * _Nullable chatDialog) {
                 [SVProgressHUD showSuccessWithStatus:@"Dialog Updated"];
                 [self performSegueWithIdentifier:@"groupDialogCreatedSeg" sender:self];
@@ -143,56 +138,16 @@
             } errorBlock:^(QBResponse * _Nonnull response) {
                 [SVProgressHUD showErrorWithStatus:@"Error Updating the dialog"];
             }];
-
+            
+        } statusBlock:^(QBRequest *request, QBRequestStatus *status) {
+            NSLog(@"-----------Dialog Avatar is now Set ----------");
         } errorBlock:^(QBResponse *response) {
+            NSLog(@"----------error: %@------", response.error);
+        }];
+
+            } errorBlock:^(QBResponse *response) {
             NSLog(@"error: %@", response.error);
         }];
- 
-    } errorBlock:^(QBResponse *response) {
-        [SVProgressHUD showErrorWithStatus:[response.error description]];
-
-    }];
-    [SVProgressHUD showWithStatus:@"Creating dialog..." maskType:SVProgressHUDMaskTypeClear];
-}
-
-//- (void)howt {
-//
-////    QBChatDialog *chatDialog = [[QBChatDialog alloc] initWithDialogID:self.chatDialog.ID type:QBChatDialogTypeGroup];
-//    chatDialog.name = self.groupName;
-//    chatDialog.occupantIDs = @[@([QBSession currentSession].currentUser.ID), @(6742693)];
-//
-//    [QBRequest createDialog:chatDialog successBlock:^(QBResponse *response, QBChatDialog *createdDialog) {
-//
-////        // your file - this is an image in our case
-////        NSData * imageData = UIImageJPEGRepresentation (self.uploadImage.image, 0.8f);
-////
-////        [QBRequest TUploadFile:imageData fileName:@"Profile Picture"  contentType:@"image/jpeg" isPublic:YES successBlock:^(QBResponse *response, QBCBlob *blob) {
-////
-////            // File uploaded, do something
-////            // if blob.isPublic == YES
-////            QBUpdateUserParameters *params = [QBUpdateUserParameters new];
-////            params.blobID = [QBSession currentSession].currentUser.blobID;
-////            [QBRequest updateCurrentUser:params successBlock:^(QBResponse * _Nonnull response, QBUUser * _Nullable user) {
-////                NSLog(@"------>>>>>>>>successfully updated image");
-////                // success block
-////            } errorBlock:^(QBResponse * _Nonnull response) {
-////                // error block
-////                NSLog(@"------>>>Failed to update user: %@<<<", [response.error reasons]);
-////            }];
-////        } statusBlock:^(QBRequest *request, QBRequestStatus *status) {
-////            // handle progress
-////        } errorBlock:^(QBResponse *response) {
-////            NSLog(@"error: %@", response.error);
-////        }];
-//
-//        [SVProgressHUD showSuccessWithStatus:@"Dialog Created"];
-//        [self performSegueWithIdentifier:@"groupDialogCreatedSeg" sender:self];
-//
-//
-//    } errorBlock:^(QBResponse *response) {
-//        [SVProgressHUD showErrorWithStatus:[response.error description]];
-//
-//    }];
-//}
+ }
 
 @end

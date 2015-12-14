@@ -135,6 +135,7 @@
 #pragma mark - Image
 
 - (void)showImage:(UIImage *)image {
+    NSLog(@"----image----%@-----",image);
 
     self.uploadGroupImage.image = image;
 }
@@ -177,7 +178,7 @@
     if ([segue.identifier isEqualToString:@"createGroupSeg"]){
     ContactListViewController *dvc = segue.destinationViewController;
     dvc.groupName = self.GroupName.text;
-    dvc.uploadImage.image = self.uploadGroupImage.image;
+    dvc.dialogAvatar = self.uploadGroupImage.image;
     }
 }
 

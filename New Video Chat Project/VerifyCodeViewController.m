@@ -58,6 +58,9 @@
 -(void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
 
+    
+   self.view.frame = CGRectMake (60,157, 280.f, 370.f);
+
     // Custom Textfield for entering the received code
     CALayer *border = [CALayer layer];
     CGFloat borderWidth = 1.5;

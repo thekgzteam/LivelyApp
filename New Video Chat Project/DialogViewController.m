@@ -19,6 +19,8 @@
 #import <QuickbloxWebRTC/QuickbloxWebRTC.h>
 #import "POP.h"
 #import <UIImageView+WebCache.h>
+#import "ContentView.h"
+
 
 #pragma mark - ALL OTHER IMPORTED VIEWS
 #import "AppDelegate.h"
@@ -37,7 +39,6 @@
 @interface DialogViewController ()  <UINavigationControllerDelegate, UIImagePickerControllerDelegate, QBChatDelegate, QBRTCClientDelegate, UIActionSheetDelegate, UIViewControllerTransitioningDelegate, UIPopoverPresentationControllerDelegate>
 
 @property OutgointTableViewCell *outgoingCell;
-@property (weak, nonatomic) IBOutlet CustomView *customViewTyping;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property UIActionSheet *actionSheet;
 @property UIPopoverPresentationController *popOver;
@@ -45,37 +46,30 @@
 @property (nonatomic, weak) IBOutlet UIImageView * imageView;
 @property  UIImagePickerController* pickerController;
 @property UIImage *image;
+@property (weak, nonatomic) IBOutlet UITextView *chatTextView;
 
-@property (weak, nonatomic) IBOutlet UIView *messageContentView;
+@property (strong,nonatomic) ContentView *handler;
 @property (weak, nonatomic) IBOutlet UIView *viewForTableCellFadeEffect;
 @property (weak, nonatomic) IBOutlet UIButton *rightbarButton;
 @property NSDate *sendMessageDate;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *chatTextViewHeightConstraint;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *contentViewHeightConstraint;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *contentViewBottomConstraint;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *viewForTableViewFadeEffectTopMargin;
 
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *contentViewBottom;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *textViewBottom;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *takePhotoBottom;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *sendButtonBottom;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *tableViewBottomContraints;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *tableViewTopConstrains;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint *mainVideoViewBottomConstraints;
-@property (weak, nonatomic) IBOutlet UIView *buttonView;
 @property (weak, nonatomic) IBOutlet UIButton *dialogSettings;
 
 
 // MY Views
-@property (weak, nonatomic) IBOutlet UIView *localVideoView;
+@property (weak, nonatomic) IBOutlet UIView *myScreen;
 @property (strong, nonatomic) QBRTCCameraCapture *videoCapture;
 @property (weak, nonatomic) IBOutlet QBRTCRemoteVideoView *opponentsView;
-@property (nonatomic, weak) QBRTCVideoCapture *capture;
-
-
 @property (weak, nonatomic) IBOutlet UIView *remoteVideoView;
+@property (strong, nonatomic) NSMutableDictionary *videoViews;
 
-@property (weak, nonatomic) IBOutlet UIImageView *user2;
-@property (weak, nonatomic) IBOutlet UIImageView *user3;
+
 
 @property (weak, nonatomic) IBOutlet UIButton *navTitleButton;
-@property (strong, nonatomic) NSMutableDictionary *videoViews;
 @property (weak, nonatomic) IBOutlet UIImageView *imageViewBehindBlur;
 @property (weak, nonatomic) IBOutlet UIVisualEffectView *visulaEffectBlur;
 
@@ -94,28 +88,20 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.automaticallyAdjustsScrollViewInsets = NO;
+    self.tableView.contentInset = UIEdgeInsetsMake(100, 0, 0, 0);
 
 
-    self.MessageInputTextView.delegate = self;
+    self.chatTextView.delegate = self;
     [[QBChat instance] addDelegate:self];
     [QBRTCClient.instance addDelegate:self];
     [QBSettings setCarbonsEnabled:YES];
-
-
     [QBRTCConfig setStatsReportTimeInterval:1.f];
 
 
     if (self.session.conferenceType == QBRTCConferenceTypeVideo) {
         [self.videoCapture startSession];
     }
-
-    //  SETTING CGRECT FOR LOCAL VIDEO
-    self.localVideoView.center = CGPointMake(340, 50);
-    CGRect frame;
-    frame.size.width = 86;
-    frame.size.height = 104;
-    self.localVideoView.bounds = frame;
-    self.videoCapture.previewLayer.frame = frame;
 
     QBRTCVideoFormat *videoFormat = [[QBRTCVideoFormat alloc] init];
     videoFormat.frameRate = 30;
@@ -124,14 +110,28 @@
     videoFormat.height = 480;
 
     self.videoCapture = [[QBRTCCameraCapture alloc] initWithVideoFormat:videoFormat position:AVCaptureDevicePositionFront];
-    self.videoCapture.previewLayer.frame = self.localVideoView.frame;
+
+    self.videoCapture.previewLayer.frame = self.myScreen.bounds;
     [self.videoCapture startSession];
-    [self.localVideoView.layer insertSublayer:self.videoCapture.previewLayer atIndex:0];
-    self.localVideoView.backgroundColor = [UIColor clearColor];
+    [self.myScreen.layer insertSublayer:self.videoCapture.previewLayer atIndex:0];
+
+    self.videoCapture.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+
+    self.myScreen.backgroundColor = [UIColor clearColor];
+    self.myScreen.layer.borderColor = [UIColor whiteColor].CGColor;
+    self.myScreen.layer.borderWidth = 2.0f;
+    self.myScreen.layer.cornerRadius = 5.0f;
 
     [QBRTCConfig setDTLSEnabled:YES];
 
     [NSTimer scheduledTimerWithTimeInterval:30 target:[QBChat instance] selector:@selector(sendPresence) userInfo:nil repeats:YES];
+
+    //Instantiating custom view that adjusts itself to keyboard show/hide
+    self.handler = [[ContentView alloc] initWithTextView:self.chatTextView ChatTextViewHeightConstraint:self.chatTextViewHeightConstraint contentView:self.contentView ContentViewHeightConstraint:self.contentViewHeightConstraint andContentViewBottomConstraint:self.contentViewBottomConstraint];
+
+
+    //Setting the minimum and maximum number of lines for the textview vertical expansion
+    [self.handler updateMinimumNumberOfLines:1 andMaximumNumberOfLine:3];
 
     // GETTING MESSAGE HISTORY
     [self retrievingMessages];
@@ -147,28 +147,26 @@
     [self.rightbarButton setClipsToBounds:YES];
     self.rightbarButton.layer.cornerRadius = 19.0f;
     [self.dialogSettings setFrame:CGRectMake(260, 27, 43, 39)];
-    self.sendMessageButton.enabled = false;
 
     self.imageViewBehindBlur.image = self.imageForRightBar;
     self.imageViewBehindBlur.backgroundColor = [UIColor clearColor];
 
 
-    [self reloaCells];
 
 
     //UI CUSTOM FOR OPONNENT VIDEO VIEWS
    
-    self.user2.layer.cornerRadius = 30;
-    self.user2.layer.masksToBounds = YES;
-    self.user2.layer.borderColor = [[UIColor whiteColor]CGColor];
-    self.user2.layer.borderWidth = 0.7;
-    self.user2.hidden = YES;
-
-    self.user3.layer.cornerRadius = 30;
-    self.user3.layer.masksToBounds = YES;
-    self.user3.layer.borderColor = [[UIColor whiteColor]CGColor];
-    self.user3.layer.borderWidth = 0.7;
-    self.user3.hidden = YES;
+//    self.user2.layer.cornerRadius = 30;
+//    self.user2.layer.masksToBounds = YES;
+//    self.user2.layer.borderColor = [[UIColor whiteColor]CGColor];
+//    self.user2.layer.borderWidth = 0.7;
+//    self.user2.hidden = YES;
+//
+//    self.user3.layer.cornerRadius = 30;
+//    self.user3.layer.masksToBounds = YES;
+//    self.user3.layer.borderColor = [[UIColor whiteColor]CGColor];
+//    self.user3.layer.borderWidth = 0.7;
+//    self.user3.hidden = YES;
 
     self.oponentVIew.layer.cornerRadius = 26;
     self.oponentVIew.layer.masksToBounds = YES;
@@ -176,11 +174,12 @@
     self.oponentVIew.layer.borderWidth = 0.7;
 
 
+
     // UI CUSTOM FOR TABLE VIEW TEXT VIEW
     self.messageArray = [[NSMutableArray alloc]init];
-    self.MessageInputTextView.layer.cornerRadius = 8.f;
-    self.MessageInputTextView.layer.borderColor = [[UIColor grayColor] CGColor];
-    self.MessageInputTextView.layer.borderWidth = 0.5f;
+    self.chatTextView.layer.cornerRadius = 8.f;
+    self.chatTextView.layer.borderColor = [[UIColor grayColor] CGColor];
+    self.chatTextView.layer.borderWidth = 0.5f;
     [self.navTitleButton setTitle:self.userFullName forState:UIControlStateNormal];
 
     // GESTURE RECOGNIZER METHODS FOR ALL
@@ -190,6 +189,7 @@
 
     UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveViewWithGestureRecognizer:)];
     [self.oponentVIew addGestureRecognizer:panGestureRecognizer];
+    [self.myScreen addGestureRecognizer:panGestureRecognizer];
 
     UIPinchGestureRecognizer *pinchGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchWithGestureRecognizer:)];
     [self.oponentVIew addGestureRecognizer:pinchGestureRecognizer];
@@ -210,7 +210,6 @@
         if ([QBSession currentSession].currentUser.ID == userID) {
             return;
         }
-
 
         [SVProgressHUD showSuccessWithStatus:@"user started typing"];
 
@@ -235,7 +234,6 @@
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
-
     [super viewDidDisappear:animated];
 }
 
@@ -255,13 +253,6 @@
     self.viewForTableCellFadeEffect.layer.mask = gradient;
 }
 
--(void)viewDidLayoutSubviews {
-    [super viewDidLayoutSubviews];
-
-    [self.MessageInputTextView  sizeToFit];
-    [self.MessageInputTextView layoutIfNeeded];
-
-}
 
 // FETCH MESSAGES FROM QUICKBLOX
 - (void)retrievingMessages {
@@ -282,12 +273,12 @@
 
 #pragma mark - METHOD TO AUTOMATICALLY SCROLL TABLE VIEW DOWN WHEN IT APPEARS
 - (void)scrollTableViewUp {
-    double y = self.tableView.contentSize.height - self.tableView.bounds.size.height;
-    CGPoint bottomOffset = CGPointMake(0, y);
-
-    if (y > -self.tableView.contentInset.top)
-        [self.tableView setContentOffset:bottomOffset animated:YES];
-    [self.tableView reloadData];
+    //Always scroll the chat table when the user sends the message
+    if([self.tableView numberOfRowsInSection:0]!=0)
+    {
+        NSIndexPath* ip = [NSIndexPath indexPathForRow:[self.tableView numberOfRowsInSection:0]-1 inSection:0];
+        [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionBottom animated:UITableViewRowAnimationLeft];
+    }
 }
 
 #pragma mark -
@@ -304,6 +295,7 @@
 }
 
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
+    [self scrollTableViewUp];
 
     [self.userDialogs sendUserIsTyping];
     return YES;
@@ -316,57 +308,22 @@
 }
 
 - (void)textViewDidChange:(UITextView *)textView {
+    [self scrollTableViewUp];
 
-    [self.messageContentView setNeedsUpdateConstraints];
-    [UIView animateWithDuration:0.1 animations:^{
-        [self.messageContentView updateConstraintsIfNeeded];
-    }];
-}
-
-- (CGFloat)textViewHeightForAttributedText: (NSAttributedString *)text andWidth: (CGFloat)width {
-
-    [self.MessageInputTextView setAttributedText:text];
-    return 40 + [self heightForText:self.MessageInputTextView.text];
 }
 
 - (BOOL)textView:(UITextView *)textView shouldChangeTextInRange:(NSRange)range replacementText:(NSString *)text {
 
-    if (![self.MessageInputTextView.text isEqualToString:@""]) {
-        self.sendMessageButton.enabled = true;
-    } else if ([self.MessageInputTextView.text isEqualToString:@""]) {
-        self.sendMessageButton.enabled = false;
-    }
 
     return YES;
 }
 
 - (void)textViewDidBeginEditing:(UITextView *)textView {
-
     [self scrollTableViewUp];
-    [UIView animateWithDuration:0.3 animations:^{
-        self.contentViewBottom.constant = 215;
-        self.sendButtonBottom.constant = 220;
-        self.takePhotoBottom.constant = 195;
-        self.textViewBottom.constant = 220;
-        self.tableViewTopConstrains.constant = 160;
-    }
-                     completion:^(BOOL finished) {
-                     }];
+
 }
 
 - (void)textViewDidEndEditing:(UITextView *)textView {
-
-    [UIView animateWithDuration:0.3 animations:^{
-        self.contentViewBottom.constant = 0;
-
-        self.sendButtonBottom.constant = 5;
-        self.takePhotoBottom.constant = -18;
-        self.textViewBottom.constant = 5;
-        self.tableViewTopConstrains.constant = 355;
-
-    }
-                     completion:^(BOOL finished) {
-                     }];
 }
 
 // ACCESSING CHAT INFO PROFILE IMAGE
@@ -403,15 +360,13 @@
 //SENDING MESSAGE
 - (IBAction)sendMessageButton:(id)sender {
 
-    self.customViewTyping.hidden = YES;
 
-    if ([self.MessageInputTextView.text isEqualToString:@""]) {
-        self.sendMessageButton.enabled = false;
-    } else
+    if([self.chatTextView.text length]!=0)
+    {
         self.sendMessageButton.enabled = true;
 
     QBChatMessage *message = [QBChatMessage message];
-    message.text = self.MessageInputTextView.text;
+    message.text = self.chatTextView.text;
     message.dialogID = self.userDialogs.ID;
 
     message.senderID = ([QBSession currentSession].currentUser.ID);
@@ -450,7 +405,8 @@
         NSUInteger userID = createdMessage.recipientID;
         NSString *userString = [NSString stringWithFormat:@"%ld", userID];
 
-        self.MessageInputTextView.text = @"";
+        self.chatTextView.text = @"";
+        [self.handler textViewDidChange:sender];
 
         // SEND PUSH NOTIFICATION ALONG WITH CREATED MESSAGE
         [QBRequest sendPushWithText:[[[[self senderDisplayName] stringByAppendingString:@": "] stringByAppendingString:createdMessage.text] mutableCopy] toUsers:userString successBlock:nil errorBlock:^(QBError *error) {
@@ -459,8 +415,8 @@
         [SVProgressHUD showErrorWithStatus:[response.error description]];
 
         NSLog(@"ERROR: %@", response.error);
-    }];
-
+        }];
+    }
 }
 
 
@@ -578,7 +534,7 @@
 }
 
 - (void)visualEffectTapped:(UITapGestureRecognizer *)recognizer {
-    [self.MessageInputTextView endEditing:YES];
+    [self.chatTextView endEditing:YES];
 }
 
 - (IBAction)rejectButton:(id)sender {
@@ -670,6 +626,59 @@
     return imageAnimGroup3;
 }
 
+    //Animation For ImageView To Minimize the Remote video Received
+
+- (CABasicAnimation*)remoteVideoReceivedImage {
+    CABasicAnimation * transformAnim = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+    transformAnim.toValue            = @(0);
+    transformAnim.duration           = 0.7;
+    transformAnim.fillMode = kCAFillModeBoth;
+    transformAnim.removedOnCompletion = NO;
+
+    return transformAnim;
+}
+//
+//    Animation to imageView when video disconnnected or  ended//
+
+- (CABasicAnimation*)videoEndedImage{
+    CABasicAnimation * transformAnim = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
+    transformAnim.fromValue          = @(0);
+    transformAnim.toValue            = @(1);
+    transformAnim.duration           = 1.5;
+    transformAnim.fillMode = kCAFillModeBoth;
+    transformAnim.removedOnCompletion = NO;
+
+    return transformAnim;
+}
+
+
+//Animation for the Blurr Effect When Video is initiated
+- (CABasicAnimation*)remoteVideoStartedBlurr{
+    CABasicAnimation * opacityAnim = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    opacityAnim.fromValue          = @1;
+    opacityAnim.toValue            = @0;
+    opacityAnim.duration           = 0.7;
+    opacityAnim.fillMode = kCAFillModeForwards;
+    opacityAnim.removedOnCompletion = NO;
+
+    return opacityAnim;
+}
+
+//Animation for the Blurr Effect When Video is Ended
+
+- (CABasicAnimation*)videoEndedBlurr{
+    CABasicAnimation * opacityAnim = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    opacityAnim.fromValue          = @0;
+    opacityAnim.toValue            = @1;
+    opacityAnim.duration           = 1.5;
+    opacityAnim.fillMode = kCAFillModeForwards;
+    opacityAnim.removedOnCompletion = NO;
+
+    return opacityAnim;
+}
+
+
+
 
 
 #pragma mark -
@@ -692,7 +701,7 @@
     }
 
     OutgointTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"outgoingCell"];
-
+    cell.backgroundColor = cell.contentView.backgroundColor;
     cell.outgoingLabel.frame = CGRectMake(66, 8, 268, 30);
 
     QBChatMessage *messageHistory = [self.messageArray objectAtIndex:indexPath.row];
@@ -757,6 +766,7 @@
 
         IncomingTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"incomingCell"];
         cell.incomingLabel.text = messageHistory.text;
+        cell.backgroundColor = cell.contentView.backgroundColor;
 
         NSArray *userids = [[NSArray alloc]initWithObjects:@(messageHistory.senderID), nil];
         [QBRequest usersWithIDs:userids page:[QBGeneralResponsePage responsePageWithCurrentPage:1 perPage:10] successBlock:^(QBResponse *response, QBGeneralResponsePage *page, NSArray *users) {
@@ -834,20 +844,6 @@
     [SVProgressHUD showSuccessWithStatus:@"adding new cell to tableView"];
 }
 
--  (void)reloaCells {
-    NSInteger numRows = [self tableView:self.tableView numberOfRowsInSection:0];
-    CGFloat contentInsetTop = self.tableView.bounds.size.height;
-    for (NSInteger i = 0; i < numRows; i++) {
-        contentInsetTop -= [self tableView:self.tableView heightForRowAtIndexPath:[NSIndexPath indexPathForItem:i inSection:0]];
-        if (contentInsetTop <= 0) {
-            contentInsetTop = 0;
-            break;
-        }
-    }
-    self.tableView.contentInset = UIEdgeInsetsMake(contentInsetTop, 0, 0, 0);
-    self.messageArray = self.messageArray.reverseObjectEnumerator.allObjects;
-}
-
 - (NSString *)senderDisplayName {
     return [QBSession currentSession].currentUser.fullName;
 }
@@ -908,39 +904,6 @@
 }
 
 
-- (UIView *)videoViewWithOpponentID:(NSNumber *)opponentID {
-
-    if (self.session.conferenceType == QBRTCConferenceTypeAudio) {
-        return nil;
-    }
-
-    if (!self.videoViews) {
-        self.videoViews = [NSMutableDictionary dictionary];
-    }
-
-    id result = self.videoViews[opponentID];
-
-    if ([QBSession currentSession].currentUser.ID == opponentID.integerValue) {//Local preview
-
-        QBRTCRemoteVideoView *remoteVideoView = nil;
-
-        QBRTCVideoTrack *remoteVideoTrak = [self.session remoteVideoTrackWithUserID:opponentID];
-
-        if (!result && remoteVideoTrak) {
-
-            remoteVideoView = [[QBRTCRemoteVideoView alloc] initWithFrame:self.localVideoView.bounds];
-            self.videoViews[opponentID] = remoteVideoView;
-            result = remoteVideoView;
-        }
-
-        [remoteVideoView setVideoTrack:remoteVideoTrak];
-
-        return result;
-    }
-
-    return result;
-}
-
 #pragma mark -
 #pragma mark UIVIEWCONTROLLER TRANSITION DELEGATE METHODS
 
@@ -970,10 +933,10 @@
 //Called in case when receive remote video track from opponent
 - (void)session:(QBRTCSession *)session receivedRemoteVideoTrack:(QBRTCVideoTrack *)videoTrack fromUser:(NSNumber *)userID {
     [SVProgressHUD showSuccessWithStatus:@"received a remote videotrack from user"];
-
-    self.opponentsView.backgroundColor = [UIColor greenColor];
+    self.opponentsView.contentMode = UIViewContentModeScaleAspectFill;
     [self.opponentsView setVideoTrack:videoTrack];
 
+//    [self.imageViewBehindBlur.layer addAnimation:[self remoteVideoReceivedImage] forKey:@"remoteVideoReceivedImage"];
 }
 
 -(void)session:(QBRTCSession *)session initializedLocalMediaStream:(QBRTCMediaStream *)mediaStream {
@@ -988,6 +951,13 @@
 
 -(void)session:(QBRTCSession *)session hungUpByUser:(NSNumber *)userID userInfo:(NSDictionary *)userInfo {
     [SVProgressHUD showSuccessWithStatus:@"hangupBYUser"];
+    [self.imageViewBehindBlur.layer addAnimation:[self videoEndedImage] forKey:@"videoEndedImage"];
+    [self.visulaEffectBlur.layer addAnimation:[self videoEndedBlurr] forKey:@"videoEndedBlurr"];
+    self.viewForTableViewFadeEffectTopMargin.constant = 250;
+    [UIView animateWithDuration:1.0 animations:^{
+        [self.viewForTableCellFadeEffect layoutIfNeeded];
+    }];
+
 }
 
 -(void)session:(QBRTCSession *)session userDidNotRespond:(NSNumber *)userID {
@@ -1004,6 +974,15 @@
 
 -(void)session:(QBRTCSession *)session connectedToUser:(NSNumber *)userID {
     [SVProgressHUD showSuccessWithStatus:@"Connected to User"];
+
+    [self.imageViewBehindBlur.layer addAnimation:[self remoteVideoReceivedImage] forKey:@"remoteVideoReceivedImage"];
+    [self.visulaEffectBlur.layer addAnimation:[self remoteVideoStartedBlurr] forKey:@"RemoteVideoStarted"];
+
+    [self.visulaEffectBlur.layer addAnimation:[self remoteVideoStartedBlurr] forKey:@"RemoteVideoStarted"];
+    self.viewForTableViewFadeEffectTopMargin.constant = 400;
+    [UIView animateWithDuration:1.0 animations:^{
+        [self.viewForTableCellFadeEffect layoutIfNeeded];
+    }];
 }
 
 -(void)session:(QBRTCSession *)session connectionClosedForUser:(NSNumber *)userID {
@@ -1016,12 +995,38 @@
 
 -(void)session:(QBRTCSession *)session disconnectedByTimeoutFromUser:(NSNumber *)userID {
     [SVProgressHUD showSuccessWithStatus:@"disconnectedbytimeoutfromuser"];
+//    [self.imageViewBehindBlur.layer addAnimation:[self videoEndedImage] forKey:@"videoEndedImage"];
+    [self.visulaEffectBlur.layer addAnimation:[self videoEndedBlurr] forKey:@"videoEndedBlurr"];
+    self.viewForTableViewFadeEffectTopMargin.constant = 250;
+    [UIView animateWithDuration:1.0 animations:^{
+        [self.viewForTableCellFadeEffect layoutIfNeeded];
+    }];
+
 }
 
 -(void)session:(QBRTCSession *)session disconnectedFromUser:(NSNumber *)userID {
     [SVProgressHUD showSuccessWithStatus:@"Disconnected from user"];
+//    [self.imageViewBehindBlur.layer addAnimation:[self videoEndedImage] forKey:@"videoEndedImage"];
+    [self.visulaEffectBlur.layer addAnimation:[self videoEndedBlurr] forKey:@"videoEndedBlurr"];
+    self.viewForTableViewFadeEffectTopMargin.constant = 250;
+    [UIView animateWithDuration:1.0 animations:^{
+        [self.viewForTableCellFadeEffect layoutIfNeeded];
+    }];
+
 }
 
+-(void)sessionDidClose:(QBRTCSession *)session {
+    [SVProgressHUD showSuccessWithStatus:@"session did close"];
+        [self.imageViewBehindBlur.layer addAnimation:[self videoEndedImage] forKey:@"videoEndedImage"];
+    [self.visulaEffectBlur.layer addAnimation:[self videoEndedBlurr] forKey:@"videoEndedBlurr"];
+
+    self.viewForTableViewFadeEffectTopMargin.constant = 250;
+    [UIView animateWithDuration:1.0 animations:^{
+        [self.viewForTableCellFadeEffect layoutIfNeeded];
+    }];
+
+
+}
 #pragma Statistic
 
 NSInteger QBRTCGetCpuUsagePercentage() {

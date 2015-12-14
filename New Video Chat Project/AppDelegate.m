@@ -23,7 +23,7 @@
 const CGFloat kQBRingThickness = 1.f;
 const NSTimeInterval kQBAnswerTimeInterval = 60.f;
 const NSTimeInterval kQBRTCDisconnectTimeInterval = 30.f;
-const NSTimeInterval kQBDialingTimeInterval = 5.f;
+const NSTimeInterval kQBDialingTimeInterval = 1000.f;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 

@@ -10,13 +10,13 @@
 
 @interface OutgointTableViewCell : UITableViewCell
 
-@property (weak, nonatomic) IBOutlet UITextView *outgoingLabel;
 @property (weak, nonatomic) IBOutlet UIImageView *profileImage;
 @property (nonatomic, strong) CALayer *image;
 @property (weak, nonatomic) IBOutlet UIImageView *statusIcon;
 @property (weak, nonatomic) IBOutlet UILabel *outgoingMessageTime;
 @property (weak, nonatomic) IBOutlet UIImageView *chosenImage;
 @property (weak, nonatomic) IBOutlet UILabel *arrowLabel;
+@property (weak, nonatomic) IBOutlet UITextView *outgoingLabel;
 
 
 @end

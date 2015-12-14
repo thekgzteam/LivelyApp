@@ -10,9 +10,9 @@
 
 @class QBChatDialog;
 
-@interface ContactListViewController : UIViewController 
+@interface ContactListViewController : UIViewController  
 @property NSString *groupName;
-@property IBOutlet UIImageView *uploadImage;
+@property UIImage *dialogAvatar;
 @property QBChatDialog *chatDialog;
 @property NSMutableArray *userIdInt;
 @end

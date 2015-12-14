@@ -11,7 +11,7 @@
 #import <Quickblox/Quickblox.h>
 #import <QuickbloxWebRTC/QuickbloxWebRTC.h>
 #import <QuartzCore/QuartzCore.h>
-
+#import "ContentView.h"
 
 @class QBRTCSession;
 
@@ -24,9 +24,9 @@
 
 - (instancetype)initWithPreviewlayer:(AVCaptureVideoPreviewLayer *)layer;
 
+@property (weak, nonatomic) IBOutlet ContentView *contentView;
 @property UIImage *imageForRightBar;
 @property (weak, nonatomic) IBOutlet UIButton *takePicButton;
-@property (weak, nonatomic) IBOutlet UITextView *MessageInputTextView;
 @property (weak, nonatomic) IBOutlet UIButton *sendMessageButton;
 @property (weak, nonatomic) IBOutlet UINavigationBar *customNavBar;
 @property (weak, nonatomic) IBOutlet UINavigationItem *navTitle;
