@@ -17,6 +17,11 @@
 @property NSMutableArray *images;
 @property NSArray *textMessages;
 @property NSArray *filteredResults;
+@property NSMutableArray *userPhotos;
+@property NSMutableArray *userPrivatePhotos;
+
+@property NSMutableArray *liveIndexPaths;
+
 
 @property (weak, nonatomic) IBOutlet UIButton *writeNewMessage;
 @property (strong, nonatomic) NSString *myUserId;

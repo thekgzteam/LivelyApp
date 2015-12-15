@@ -20,8 +20,7 @@
 
 @implementation AppDelegate
 
-const CGFloat kQBRingThickness = 1.f;
-const NSTimeInterval kQBAnswerTimeInterval = 60.f;
+const NSTimeInterval kQBAnswerTimeInterval = 1000.f;
 const NSTimeInterval kQBRTCDisconnectTimeInterval = 30.f;
 const NSTimeInterval kQBDialingTimeInterval = 1000.f;
 
@@ -102,10 +101,9 @@ if ([[vComp objectAtIndex:0] intValue] >= 8) {
     [[UIApplication sharedApplication] registerForRemoteNotificationTypes:UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound];
 #endif
 }
-
 - (void)applicationWillTerminate:(UIApplication *)application {
-    [[QBChat instance] disconnectWithCompletionBlock:^(NSError * _Nullable error) {
-    }];
+//    [[QBChat instance] disconnectWithCompletionBlock:^(NSError * _Nullable error) {
+//    }];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
@@ -118,7 +116,6 @@ if ([[vComp objectAtIndex:0] intValue] >= 8) {
   
 }
 - (void)applicationWillEnterForeground:(UIApplication *)application {
-
     [[QBChat instance] connectWithUser:[QBSession currentSession].currentUser completion:^(NSError * _Nullable error) {
     }];
 }

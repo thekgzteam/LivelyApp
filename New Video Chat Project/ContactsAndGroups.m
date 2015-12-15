@@ -413,10 +413,8 @@
                 NSInteger currentTimeInterval = [[NSDate date] timeIntervalSince1970];
                 NSInteger userLastRequestAtTimeInterval   = [[user lastRequestAt] timeIntervalSince1970];
 
-
-
 //            TO DO  1 , USER ONlINE
-                if((currentTimeInterval - userLastRequestAtTimeInterval) > 30){
+                if((currentTimeInterval - userLastRequestAtTimeInterval) < 30){
                     cell.userOnlineIndicatorLabel.enabled = YES;
                     cell.userOnlineIndicatorLabel.hidden = NO;
         [cell.userOnlineIndicatorLabel.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];

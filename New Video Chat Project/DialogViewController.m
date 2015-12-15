@@ -35,8 +35,8 @@
 @class QBRTCRemoteVideoView;
 @class QBRTCVideoTrack;
 @class QBRTCStatsReport;
-
-@interface DialogViewController ()  <UINavigationControllerDelegate, UIImagePickerControllerDelegate, QBChatDelegate, QBRTCClientDelegate, UIActionSheetDelegate, UIViewControllerTransitioningDelegate, UIPopoverPresentationControllerDelegate>
+@class QBChat;
+@interface DialogViewController ()  <UINavigationControllerDelegate, UIImagePickerControllerDelegate, QBChatDelegate, QBRTCClientDelegate, UIActionSheetDelegate, UIViewControllerTransitioningDelegate, UIPopoverPresentationControllerDelegate, UIGestureRecognizerDelegate>
 
 @property OutgointTableViewCell *outgoingCell;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
@@ -65,7 +65,8 @@
 @property (weak, nonatomic) IBOutlet UIView *myScreen;
 @property (strong, nonatomic) QBRTCCameraCapture *videoCapture;
 @property (weak, nonatomic) IBOutlet QBRTCRemoteVideoView *opponentsView;
-@property (weak, nonatomic) IBOutlet UIView *remoteVideoView;
+@property (weak, nonatomic) IBOutlet QBRTCRemoteVideoView *remoteVideoViewOne;
+
 @property (strong, nonatomic) NSMutableDictionary *videoViews;
 
 
@@ -89,6 +90,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.tableView.contentInset = UIEdgeInsetsMake(100, 0, 0, 0);
 
@@ -169,10 +171,10 @@
 //    self.user3.layer.borderWidth = 0.7;
 //    self.user3.hidden = YES;
 
-    self.oponentVIew.layer.cornerRadius = 26;
-    self.oponentVIew.layer.masksToBounds = YES;
-    self.oponentVIew.layer.borderColor = [[UIColor whiteColor]CGColor];
-    self.oponentVIew.layer.borderWidth = 0.7;
+    self.remoteVideoViewOne.layer.cornerRadius = 26;
+    self.remoteVideoViewOne.layer.masksToBounds = YES;
+    self.remoteVideoViewOne.layer.borderColor = [[UIColor whiteColor]CGColor];
+    self.remoteVideoViewOne.layer.borderWidth = 0.7;
 
 
 
@@ -190,18 +192,18 @@
     [self.opponentsView addGestureRecognizer:tapRecognizer];
 
     UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(moveViewWithGestureRecognizer:)];
-    [self.oponentVIew addGestureRecognizer:panGestureRecognizer];
-    [self.myScreen addGestureRecognizer:panGestureRecognizer];
+    panGestureRecognizer.cancelsTouchesInView = NO;
+    [self.remoteVideoViewOne addGestureRecognizer:panGestureRecognizer];
 
-    UIPinchGestureRecognizer *pinchGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchWithGestureRecognizer:)];
-    [self.oponentVIew addGestureRecognizer:pinchGestureRecognizer];
+//    UIPinchGestureRecognizer *pinchGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchWithGestureRecognizer:)];
+//    [self.remoteVideoViewOne addGestureRecognizer:pinchGestureRecognizer];
 
     UITapGestureRecognizer *doubleTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapGesture:)];
-    [self.oponentVIew addGestureRecognizer:doubleTapGestureRecognizer];
+    [self.remoteVideoViewOne addGestureRecognizer:doubleTapGestureRecognizer];
     doubleTapGestureRecognizer.numberOfTapsRequired = 2;
 
     UITapGestureRecognizer *singleTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTapGesture:)];
-    [self.oponentVIew addGestureRecognizer:singleTapGestureRecognizer];
+    [self.remoteVideoViewOne addGestureRecognizer:singleTapGestureRecognizer];
     singleTapGestureRecognizer.numberOfTapsRequired = 1;
 
 
@@ -263,6 +265,12 @@
 
     [QBRequest messagesWithDialogID:self.userDialogs.ID extendedRequest:nil forPage:resPage successBlock:^(QBResponse *response, NSArray *messages, QBResponsePage *responcePage) {
         wSelf.messageArray = messages.mutableCopy;
+        wSelf.userPhotos = [NSMutableArray arrayWithCapacity:messages.count];
+
+        for (id o in messages) {
+            [wSelf.userPhotos addObject:[NSNull null]];
+        }
+
         [wSelf.tableView reloadData];
     } errorBlock:^(QBResponse *response) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -299,7 +307,6 @@
 
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
     [self scrollTableViewUp];
-
     [self.userDialogs sendUserIsTyping];
     return YES;
 }
@@ -323,7 +330,6 @@
 }
 
 - (void)textViewDidBeginEditing:(UITextView *)textView {
-    [self.typingCell.customView startAllAnimations:textView];
 }
 
 - (void)textViewDidEndEditing:(UITextView *)textView {
@@ -333,8 +339,7 @@
 - (IBAction)onRightBarButtonPressed:(id)sender {
 
     UserImageVC *dvc = [self.storyboard instantiateViewControllerWithIdentifier:@"UserImageVC"];
-    dvc.transitioningDelegate = self;
-    dvc.modalPresentationStyle = UIModalPresentationCustom;
+    dvc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     dvc.imageForUserImage = self.imageForRightBar;
     [self presentViewController:dvc animated:YES completion:nil];
 
@@ -356,7 +361,8 @@
 
     [[NSNotificationCenter defaultCenter] postNotificationName:@"reloadTableViewNotification"
                                                         object:self];
-    [self.session hangUp:@{@"key" : @"value"}];
+
+    [self.session hangUp:@{ @"DialogID" : self.userDialogs.ID}];
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
@@ -491,13 +497,13 @@
 #pragma mark - GESTURE RECOGNIZER METHODS FOR ALL
 
 - (void) moveViewWithGestureRecognizer:(UIPanGestureRecognizer *)panGestureRecognizer{
-    CGPoint touchLocation = [panGestureRecognizer locationInView:self.remoteVideoView];
+    CGPoint touchLocation = [panGestureRecognizer locationInView:self.view];
 
-    self.oponentVIew.center = touchLocation;
+    self.remoteVideoViewOne.center = touchLocation;
 }
 
 - (void)handlePinchWithGestureRecognizer:(UIPinchGestureRecognizer *)pinchGestureRecognizer{
-    self.oponentVIew.transform = CGAffineTransformScale(self.oponentVIew.transform, pinchGestureRecognizer.scale, pinchGestureRecognizer.scale);
+    self.remoteVideoViewOne.transform = CGAffineTransformScale(self.remoteVideoViewOne.transform, pinchGestureRecognizer.scale, pinchGestureRecognizer.scale);
 
     pinchGestureRecognizer.view.transform = CGAffineTransformScale(pinchGestureRecognizer.view.transform, pinchGestureRecognizer.scale, pinchGestureRecognizer.scale);
 
@@ -513,9 +519,9 @@
     //    }
     //    CGPoint currentCenter = self.oponentVIew.center;
     //
-    self.oponentVIew.frame = CGRectMake(self.oponentVIew.frame.origin.x, self.oponentVIew.frame.origin.y, newWidth, newHeight);
+    self.remoteVideoViewOne.frame = CGRectMake(self.remoteVideoViewOne.frame.origin.x, self.remoteVideoViewOne.frame.origin.y, newWidth, newHeight);
     //    self.oponentVIew.center = currentCenter;
-    self.oponentVIew.layer.cornerRadius = 50;
+    self.remoteVideoViewOne.layer.cornerRadius = 50;
 }
 
 -(void)doubleTapGesture:(UITapGestureRecognizer *)tapGestureRecognizer2 {
@@ -530,26 +536,17 @@
     //    }
     //    CGPoint currentCenter = self.oponentVIew.center;
     //
-    self.oponentVIew.frame = CGRectMake(self.oponentVIew.frame.origin.x, self.oponentVIew.frame.origin.y, newWidth, newHeight);
+    self.remoteVideoViewOne.frame = CGRectMake(self.remoteVideoViewOne.frame.origin.x, self.remoteVideoViewOne.frame.origin.y, newWidth, newHeight);
     //    self.oponentVIew.center = currentCenter;
-    self.oponentVIew.layer.cornerRadius = self.oponentVIew.layer.cornerRadius;
-    self.oponentVIew.layer.cornerRadius = 31 ;
+    self.remoteVideoViewOne.layer.cornerRadius = self.remoteVideoViewOne.layer.cornerRadius;
+    self.remoteVideoViewOne.layer.cornerRadius = 31 ;
 }
 
 - (void)visualEffectTapped:(UITapGestureRecognizer *)recognizer {
     [self.chatTextView endEditing:YES];
 }
 
-- (IBAction)rejectButton:(id)sender {
-    [self.session rejectCall:nil];
-}
-- (IBAction)temporaryAcceptCallButton:(id)sender {
-    NSDictionary *userInfo = @{@"acceptCall" : @"userInfo"};
-    [self.session acceptCall:userInfo];
 
-    [SVProgressHUD showSuccessWithStatus:@"Trying to accept the call"];
-
-}
 - (IBAction)onSettingsButtonPressed:(id)sender {
     DIalogSettingViewController *dvc = [self.storyboard instantiateViewControllerWithIdentifier:@"DIalogSettingsVC"];
     dvc.transitioningDelegate = self;
@@ -697,6 +694,7 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 
+    [[QBChat instance] addDelegate:self];
 
     self.chatTextView.delegate = self;
 
@@ -704,10 +702,7 @@
     if ([[self.messageArray objectAtIndex:indexPath.row] isEqual:@0]) {
         UserIsTypingCell *cell = [tableView dequeueReusableCellWithIdentifier:@"useristyping"];
         cell.backgroundColor = cell.contentView.backgroundColor;
-        [cell reloadInputViews];
-//        NSIndexPath* rowToReload = [NSIndexPath indexPathForRow:3 inSection:0];
-//        NSArray* rowsToReload = [NSArray arrayWithObjects:rowToReload, nil];
-//        [myUITableView reloadRowsAtIndexPaths:rowsToReload withRowAnimation:UITableViewRowAnimationNone];
+        [cell.customView startAllAnimations:self];
 
         return cell;
     }
@@ -715,12 +710,21 @@
     OutgointTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"outgoingCell"];
     cell.backgroundColor = cell.contentView.backgroundColor;
     cell.outgoingLabel.frame = CGRectMake(66, 8, 268, 30);
+    UIImage *photo = [self.userPhotos objectAtIndex:indexPath.row];
+
 
     QBChatMessage *messageHistory = [self.messageArray objectAtIndex:indexPath.row];
 
     if (messageHistory.senderID == [QBSession currentSession].currentUser.ID) {
         cell.outgoingLabel.text = messageHistory.text;
 
+        messageHistory.markable = true;
+        // sends 'read' status back
+        if([messageHistory markable]){
+            [[QBChat instance] readMessage:messageHistory completion:^(NSError * _Nullable error) {
+
+            }];
+        }
 
         NSDateFormatter *df = [[NSDateFormatter alloc] init];
         df.dateStyle = NSDateFormatterShortStyle;
@@ -740,18 +744,30 @@
             NSString *result = [df stringFromDate:messageHistory.createdAt];
             cell.outgoingMessageTime.text = result;
         }
+
+                    if (![photo isEqual:[NSNull null]]) {
+                        cell.profileImage.image = photo;
+                    } else {
+
         NSArray *userids = [[NSArray alloc]initWithObjects:@(messageHistory.senderID), nil];
         [QBRequest usersWithIDs:userids page:[QBGeneralResponsePage responsePageWithCurrentPage:1 perPage:10] successBlock:^(QBResponse *response, QBGeneralResponsePage *page, NSArray *users) {
             for (QBUUser *user in users) {
                 NSUInteger userProfilePictureID = user.blobID;
 
                 [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
+                    UIImage *userImage = [UIImage imageWithData:fileData];
 
-                    // Here we use the new provided sd_setImageWithURL: method to load the web image
-                    //                    [cell.profileImage sd_setImageWithURL:[NSURL URLWithString:@"http://www.domain.com/path/to/image.jpg"]
-                    //                                      placeholderImage:[UIImage imageWithData:fileData]];
+                        if (userImage == nil) {
+                             [self.userPhotos insertObject:[UIImage imageNamed:@"Profile Picture"] atIndex:indexPath.row];
+    
+                        } else {
+    
+                            [self.userPhotos insertObject:userImage atIndex:indexPath.row];
+                        }
+    
+                        cell.profileImage.image = [self.userPhotos objectAtIndex:indexPath.row];
 
-                    cell.profileImage.image = [UIImage imageWithData:fileData];
+//                    cell.profileImage.image = [UIImage imageWithData:fileData];
 
                 } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
                     nil;
@@ -762,22 +778,23 @@
         } errorBlock:^(QBResponse *response) {
             // Handle error here
         }];
-
+                    }
         cell.chosenImage.image = self.imageView.image;
 
         NSInteger sectionsAmount = [tableView numberOfSections];
         NSInteger rowsAmount = [tableView numberOfRowsInSection:[indexPath section]];
-        if ([indexPath section] == sectionsAmount - 1 && [indexPath row] == rowsAmount - 1) {
-
-            [cell.statusIcon.layer addAnimation:[self imageAnimation] forKey:@"imageAnimation"];
-            cell.statusIcon.image = [UIImage imageNamed:@"sentIcon"];
-
-        }
+//        if ([indexPath section] == sectionsAmount - 1 && [indexPath row] == rowsAmount - 1) {
+//
+//            [cell.statusIcon.layer addAnimation:[self imageAnimation] forKey:@"imageAnimation"];
+//            cell.statusIcon.image = [UIImage imageNamed:@"sentIcon"];
+//
+//        }
         return cell;
     } else {
 
         IncomingTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"incomingCell"];
         cell.incomingLabel.text = messageHistory.text;
+        [messageHistory markable];
         cell.backgroundColor = cell.contentView.backgroundColor;
 
         NSArray *userids = [[NSArray alloc]initWithObjects:@(messageHistory.senderID), nil];
@@ -835,7 +852,7 @@
     QBChatMessage *messageHistory = [self.messageArray objectAtIndex:indexPath.row];
     NSString * yourText = messageHistory.text;
 
-    return 20 + [self heightForText:yourText];
+    return 25 + [self heightForText:yourText];
 }
 
 - (CGFloat)heightForText:(NSString *)text {
@@ -848,11 +865,7 @@
 
 - (void)updateTableContentInset:(NSNotification *) notification  {
 
-    //    [self.tableView reloadData];
-    //    [self.tableView beginUpdates];
-    //        NSArray *indexPathArray = [NSArray arrayWithObject:[NSIndexPath indexPathForRow:1 inSection:0]];//
-    //        [self.tableView reloadRowsAtIndexPaths:indexPathArray withRowAnimation:UITableViewRowAnimationFade];
-    //        [self.tableView endUpdates];
+    [self scrollTableViewUp];
     [SVProgressHUD showSuccessWithStatus:@"adding new cell to tableView"];
 }
 
@@ -865,9 +878,22 @@
 
 
 - (void)chatDidReceiveSystemMessage:(QBChatMessage *)message{
+
+    [self.messageArray addObject:message];
+    [self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:self.messageArray.count -1 inSection:0]] withRowAnimation:UITableViewRowAnimationLeft];
     [SVProgressHUD showSuccessWithStatus:@"system received message"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"updateTableContentInset"
                                                         object:self];
+
+
+//    message.markable = true;
+//    // sends 'read' status back
+//    if([message markable]){
+//        [[QBChat instance] readMessage:message completion:^(NSError * _Nullable error) {
+//
+//        }];
+//    }
+
 }
 
 - (void)chatDidReceiveMessage:(QBChatMessage *)message {
@@ -883,9 +909,7 @@
         [SVProgressHUD showSuccessWithStatus:@"message was delivered"];
     }];
 }
-
 - (void)chatDidReadMessageWithID:(NSString *)messageID dialogID:(NSString *)dialogID readerID:(NSUInteger)readerID {
-    dialogID = self.userDialogs.ID;
 
     self.outgoingCell.statusIcon.image = [UIImage imageNamed:@"readStatus"];
 
@@ -944,9 +968,28 @@
 
 //Called in case when receive remote video track from opponent
 - (void)session:(QBRTCSession *)session receivedRemoteVideoTrack:(QBRTCVideoTrack *)videoTrack fromUser:(NSNumber *)userID {
+
+    if (!self.videoViews) {
+        self.videoViews = [NSMutableDictionary dictionary];
+    }
+
+    NSLog(@"--session----%@", session);
     [SVProgressHUD showSuccessWithStatus:@"received a remote videotrack from user"];
     self.opponentsView.contentMode = UIViewContentModeScaleAspectFill;
-    [self.opponentsView setVideoTrack:videoTrack];
+    self.remoteVideoViewOne.contentMode = UIViewContentModeScaleAspectFill;
+
+    QBRTCVideoTrack *remoteVideoTrak1 = [session remoteVideoTrackWithUserID:@7613327];
+    [self.opponentsView setVideoTrack:remoteVideoTrak1];
+
+    QBRTCVideoTrack *remoteVideoTrak2 = [session remoteVideoTrackWithUserID:@7261406];
+    [self.remoteVideoViewOne setVideoTrack:remoteVideoTrak2];
+
+//    if (!result && remoteVideoTrak) {
+//        remoteVideoView = [[QBRTCRemoteVideoView alloc]initWithFrame:self.remoteVideoViewOne.bounds];
+//        self.videoViews[userID] = remoteVideoView;
+//        result = remoteVideoView;
+//    }
+
 
 //    [self.imageViewBehindBlur.layer addAnimation:[self remoteVideoReceivedImage] forKey:@"remoteVideoReceivedImage"];
 }
@@ -962,6 +1005,7 @@
 }
 
 -(void)session:(QBRTCSession *)session hungUpByUser:(NSNumber *)userID userInfo:(NSDictionary *)userInfo {
+    
     [SVProgressHUD showSuccessWithStatus:@"hangupBYUser"];
     [self.imageViewBehindBlur.layer addAnimation:[self videoEndedImage] forKey:@"videoEndedImage"];
     [self.visulaEffectBlur.layer addAnimation:[self videoEndedBlurr] forKey:@"videoEndedBlurr"];
@@ -1029,6 +1073,8 @@
 
 -(void)sessionDidClose:(QBRTCSession *)session {
     [SVProgressHUD showSuccessWithStatus:@"session did close"];
+
+    self.session = nil;
         [self.imageViewBehindBlur.layer addAnimation:[self videoEndedImage] forKey:@"videoEndedImage"];
     [self.visulaEffectBlur.layer addAnimation:[self videoEndedBlurr] forKey:@"videoEndedBlurr"];
 

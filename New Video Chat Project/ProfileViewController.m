@@ -15,10 +15,13 @@
 
 #import "ProfileSettingsViewController.h"
 #import "RegistrationViewController.h"
+#import <MessageUI/MessageUI.h>
+#import <MessageUI/MFMailComposeViewController.h>
 
 
 
-@interface ProfileViewController ()
+
+@interface ProfileViewController ()<MFMailComposeViewControllerDelegate>
 
 @property (weak, nonatomic) IBOutlet UIButton *settingsButton;
 @property (weak, nonatomic) IBOutlet UIImageView *profilePic;
@@ -119,16 +122,42 @@
     [self viewDidLoad];
 
 }
+- (IBAction)sendFeedbackButton:(id)sender {
+
+    // From within your active view controller
+    if([MFMailComposeViewController canSendMail]) {
+        MFMailComposeViewController *mailCont = [[MFMailComposeViewController alloc] init];
+        mailCont.mailComposeDelegate = self;
+
+        [mailCont setSubject:@"Please Specify App Bug Subject"];
+        [mailCont setToRecipients:[NSArray arrayWithObject:@"thekgzteam@gmail.com"]];
+        [mailCont setMessageBody:@"PLease Specify a Bug, Thank You, Lively Administration" isHTML:NO];
+
+        [self presentModalViewController:mailCont animated:YES];
+    }
+}
+
+- (void)mailComposeController:(MFMailComposeViewController*)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error {
+    [self dismissModalViewControllerAnimated:YES];
+}
 
 - (IBAction)actionButtonPressed:(id)sender {
 
     NSString *string = @"Hey Check out This New app Lively, Here the Link To Download it";
     UIActivityViewController *activityVC = [[UIActivityViewController alloc] initWithActivityItems:@[string]
                                                                              applicationActivities:nil];
+    //if iPhone
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
     [self presentViewController:activityVC animated:YES completion:nil];
 }
 
-
+//if iPad
+else {
+    // Change Rect to position Popover
+    UIPopoverController *popup = [[UIPopoverController alloc] initWithContentViewController:activityVC];
+    [popup presentPopoverFromRect:CGRectMake(self.view.frame.size.width/2, self.view.frame.size.height/4, 0, 0)inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+    }
+}
 #pragma mark - UIViewControllerTransitionDelegate -
 
 - (id <UIViewControllerAnimatedTransitioning>)animationControllerForPresentedController:(UIViewController *)presented presentingController:(UIViewController *)presenting sourceController:(UIViewController *)source {

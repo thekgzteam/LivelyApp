@@ -69,6 +69,7 @@
 		FD71D24F1BCF7FF70056EA7F /* IntroToProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD71D24E1BCF7FF70056EA7F /* IntroToProfileViewController.m */; settings = {ASSET_TAGS = (); }; };
 		FD71D2521BD048250056EA7F /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD71D2511BD048250056EA7F /* MainViewController.m */; settings = {ASSET_TAGS = (); }; };
 		FD71D2551BD0487D0056EA7F /* MainTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD71D2541BD0487D0056EA7F /* MainTableViewCell.m */; settings = {ASSET_TAGS = (); }; };
+		FD8E65801C201B8A006A42B4 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD8E657F1C201B89006A42B4 /* MessageUI.framework */; };
 		FDAE6C211C06429800399489 /* QCMethod.m in Sources */ = {isa = PBXBuildFile; fileRef = FDAE6C201C06429800399489 /* QCMethod.m */; settings = {ASSET_TAGS = (); }; };
 		FDAE6C2D1C07D20B00399489 /* UserIsTypingCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FDAE6C2C1C07D20B00399489 /* UserIsTypingCell.m */; settings = {ASSET_TAGS = (); }; };
 		FDAE6C301C08853700399489 /* CustomView.m in Sources */ = {isa = PBXBuildFile; fileRef = FDAE6C2F1C08853700399489 /* CustomView.m */; settings = {ASSET_TAGS = (); }; };
@@ -264,6 +265,7 @@
 		FD71D2511BD048250056EA7F /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		FD71D2531BD0487D0056EA7F /* MainTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainTableViewCell.h; sourceTree = "<group>"; };
 		FD71D2541BD0487D0056EA7F /* MainTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainTableViewCell.m; sourceTree = "<group>"; };
+		FD8E657F1C201B89006A42B4 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		FD9D6E271C11425E001B17F9 /* New Video Chat ProjectTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "New Video Chat ProjectTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD9D6E281C11425E001B17F9 /* New Video Chat ProjectUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "New Video Chat ProjectUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDAE6C1F1C06429800399489 /* QCMethod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QCMethod.h; sourceTree = "<group>"; };
@@ -303,6 +305,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD8E65801C201B8A006A42B4 /* MessageUI.framework in Frameworks */,
 				FDF1351D1C1142D0001767C1 /* Accelerate.framework in Frameworks */,
 				FDF1351E1C1142D0001767C1 /* Accounts.framework in Frameworks */,
 				FDF1351F1C1142D0001767C1 /* AddressBook.framework in Frameworks */,
@@ -357,6 +360,7 @@
 		BC61BC967A60BBD6636975EF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FD8E657F1C201B89006A42B4 /* MessageUI.framework */,
 				FDF135081C1142D0001767C1 /* Accelerate.framework */,
 				FDF135091C1142D0001767C1 /* Accounts.framework */,
 				FDF1350A1C1142D0001767C1 /* AddressBook.framework */,

@@ -23,7 +23,7 @@
     self.userOnlineIndicatorLabel.layer.cornerRadius = 6;
     self.userOnlineIndicatorLabel.layer.masksToBounds = YES;
 
-
+    self.userOnlineIndicatorLabel.hidden = YES;
    
 
 //    [self.userOnlineIndicatorLabel.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];

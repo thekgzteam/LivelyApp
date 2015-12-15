@@ -37,10 +37,9 @@
 @property (strong, nonatomic) UINavigationController *nav;
 @property (weak, nonatomic) QBRTCSession *currentSession;
 @property (weak, nonatomic) QBRTCSession *sessionToAccept;
-@property MainTableViewCell *mainVcCell;
+
 
 @property (weak, nonatomic) IBOutlet UILabel *allTextsButtonAndNumberOfDialogs;
-@property BOOL isOnline;
 
 @end
 
@@ -49,7 +48,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    self.isOnline = false;
+    self.liveIndexPaths = [NSMutableArray new];
+
 
 #pragma mark -  NSNOTIFICATIONS
 
@@ -139,6 +139,11 @@
     __weak MainViewController *wSelf = self;
     [QBRequest dialogsForPage:page extendedRequest:nil successBlock:^(QBResponse *response, NSArray *dialogObjects, NSSet *dialogsUsersIDs, QBResponsePage *page) {
         wSelf.textMessages = dialogObjects;
+        wSelf.userPhotos = [NSMutableArray arrayWithCapacity:dialogObjects.count];
+
+        for (id o in dialogObjects) {
+            [wSelf.userPhotos addObject:[NSNull null]];
+        }
         dispatch_async(dispatch_get_main_queue(), ^{
             [wSelf.tableView reloadData];
         });
@@ -181,6 +186,7 @@
 
     MainTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"maincellid"];
     QBChatDialog *allDialogs = [self.textMessages objectAtIndex:indexPath.row];
+    UIImage *photo = [self.userPhotos objectAtIndex:indexPath.row];
 
 
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
@@ -197,14 +203,35 @@
        switch (allDialogs.type) {
         case QBChatDialogTypeGroup: {
 
-            [QBRequest downloadFileWithUID:allDialogs.photo successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
+//            if (![photo isEqual:[NSNull null]]) {
+//                cell.profileImage.image = photo;
+//            } else {
 
-//                cell.profileImage.image = [UIImage imageWithData:fileData];
-                   cell.profileImage.image = [UIImage imageNamed:@"group icon-1"];
+                NSUInteger indexID = [allDialogs.photo integerValue];
+                __weak MainViewController *wSelf = self;
+                [QBRequest downloadFileWithID:indexID successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
 
-            } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
-                nil;
-            } errorBlock:nil];
+                    if (fileData == nil) {
+                        cell.profileImage.image = [UIImage imageNamed:@"group icon-1"];
+                    } else {
+                        cell.profileImage.image = [UIImage imageWithData:fileData];
+                    }
+//                    UIImage *userImage = [UIImage imageWithData:fileData];
+//
+//                    if (userImage == nil) {
+//                         [wSelf.userPhotos insertObject:[UIImage imageNamed:@"group icon-1"] atIndex:indexPath.row];
+//    
+//                    } else {
+//
+//                        [wSelf.userPhotos insertObject:userImage atIndex:indexPath.row];
+//                    }
+//
+//                    cell.profileImage.image = [wSelf.userPhotos objectAtIndex:indexPath.row];
+
+                } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
+                    nil;
+                } errorBlock:nil];
+//            }
         };
 //               cell.profileImage.image = [UIImage imageNamed:@"group icon-1"];
 
@@ -222,6 +249,7 @@
 
         break;
         case QBChatDialogTypePrivate: {
+
 
             NSMutableArray *occID = [[NSMutableArray alloc]initWithArray:allDialogs.occupantIDs];
 
@@ -249,8 +277,10 @@
 
                 cell.timeOfMessage.text = result;
             }
-            cell.profileImage.image = [UIImage imageNamed:@"Profile Picture"];
 
+            if (![photo isEqual:[NSNull null]]) {
+                cell.profileImage.image = photo;
+            } else {
 
             NSArray *userids = [[NSArray alloc]initWithObjects:@(allDialogs.recipientID), nil];
             [QBRequest usersWithIDs:userids page:[QBGeneralResponsePage responsePageWithCurrentPage:1 perPage:10] successBlock:^(QBResponse *response, QBGeneralResponsePage *page, NSArray *users) {
@@ -259,11 +289,19 @@
 
                     __weak MainViewController *wSelf = self;
                     [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
-                        // Here we use the new provided sd_setImageWithURL: method to load the web image
-//                        [cell.profileImage sd_setImageWithURL:[NSURL URLWithString:@"http://www.domain.com/path/to/image.jpg"]
-//                                          placeholderImage:[UIImage imageWithData:fileData]];
+                        UIImage *userImage = [UIImage imageWithData:fileData];
 
-                        cell.profileImage.image = [UIImage imageWithData:fileData];
+                        if (userImage == nil) {
+                            [wSelf.userPhotos insertObject:[UIImage imageNamed:@"Profile Picture"] atIndex:indexPath.row];
+
+                        } else {
+
+                            [wSelf.userPhotos insertObject:userImage atIndex:indexPath.row];
+                        }
+                        
+                        cell.profileImage.image = [wSelf.userPhotos objectAtIndex:indexPath.row];
+
+//                        cell.profileImage.image = [UIImage imageWithData:fileData];
 
 
 
@@ -276,8 +314,8 @@
             } errorBlock:^(QBResponse *response) {
                 // Handle error here
             }];
-
         }  break;
+    }
         case QBChatDialogTypePublicGroup: {
             cell.profileName.text = allDialogs.name;
             cell.textMessage.text = allDialogs.lastMessageText;
@@ -360,14 +398,14 @@
     self.userDialogToBePassed = self.textMessages[indexPath.row];
 
 
-
-    if (self.isOnline == true) {
+    if ([self.liveIndexPaths containsObject:indexPath]) {
         NSDictionary *userInfo = @{ @"key" : @"value" };
-
         [self.sessionToAccept acceptCall:userInfo];
+        [self.liveIndexPaths removeObject:indexPath];
         [self performSegueWithIdentifier:@"openDialogSeg" sender:self];
 
-    } else if (self.isOnline == false) {
+    } else
+    {
 
 
 #pragma mark - MAKING A VIDEO CALL
@@ -385,7 +423,7 @@
     if (currentUserIndex) [opponentsIDs removeObjectAtIndex:[currentUserIndex intValue]];
     QBRTCSession *session = [QBRTCClient.instance createNewSessionWithOpponents:opponentsIDs
                                                              withConferenceType:QBRTCConferenceTypeVideo];
-    NSDictionary *userInfo = @{ @"key" : @"value" };
+    NSDictionary *userInfo = @{ @"DialogID" : self.userDialogToBePassed.ID };
     [session startCall:userInfo];
     if (session) {
         
@@ -430,17 +468,6 @@
 }
 
 
-- (CABasicAnimation*)isLiveAnimation{
-    CABasicAnimation * fillColorAnim = [CABasicAnimation animationWithKeyPath:@"fillColor"];
-    fillColorAnim.toValue            = (id)[UIColor colorWithRed:0.0755 green: 0.922 blue:0 alpha:1].CGColor;
-    fillColorAnim.duration           = 0.733;
-    fillColorAnim.autoreverses       = YES;
-    fillColorAnim.fillMode = kCAFillModeForwards;
-    fillColorAnim.removedOnCompletion = NO;
-    fillColorAnim.repeatCount = 200;
-
-    return fillColorAnim;
-}
 
 #pragma mark - UIVIEWCONTROLLER TRANSITION DELEGATE METHODS
 
@@ -451,47 +478,64 @@
 - (id <UIViewControllerAnimatedTransitioning>)animationControllerForDismissedController:(UIViewController *)dismissed {
     return [[DismissingAnimationController alloc] init];
 }
-
 #pragma mark -
 #pragma mark QBRTCClientDelegate
 
 - (void)didReceiveNewSession:(QBRTCSession *)session userInfo:(NSDictionary *)userInfo {
 
 
-    NSIndexPath *selectedIndexPath = [self.tableView indexPathForSelectedRow];
-    MainTableViewCell *cell = [self.tableView cellForRowAtIndexPath:selectedIndexPath];
+    NSString *dialogID = userInfo[@"DialogID"];
+    MainTableViewCell *cell;
+    for (QBChatDialog *dialog in self.textMessages) {
+        if ([dialog.ID isEqualToString:dialogID]) {
+            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:[self.textMessages indexOfObject:dialog] inSection:0];
+            cell = [self.tableView cellForRowAtIndexPath:indexPath];
+            [self.liveIndexPaths addObject:indexPath];
+            break;
+        }
+    }
 
-//    if (self.currentSession) {
-//        [SVProgressHUD showSuccessWithStatus:@"call is rejected"];
-//        [session rejectCall:@{@"reject" : @"busy"}];
-//        return;
-//    } else {
-        self.isOnline = true;
+    if (self.currentSession) {
+        [SVProgressHUD showSuccessWithStatus:@"call is rejected"];
+        [session rejectCall:@{@"reject" : @"busy"}];
+        return;
+    } else {
+
         self.currentSession = session;
         self.sessionToAccept = session;
-        [cell.layer addAnimation:[self isLiveAnimation] forKey:@"isLiveAnimation"];
-        cell.isLiveIndicator.hidden = false;
-    self.mainVcCell.isLiveIndicator.hidden = false;
+
+
+    cell.isLiveIndicator.hidden = false;
+       
+
+
         [SVProgressHUD showSuccessWithStatus:@"call is coming"];
         [self.tableView reloadData];
-//    }
-//                [cell.layer removeAllAnimations];
-//                    self.isOnline = false;
-
-
-//    //    NSParameterAssert(!self.nav);
-//    IncomingViewController *dvc = [self.storyboard instantiateViewControllerWithIdentifier:@"IncomingCallViewController"];
-//    dvc.session = self.currentSession;
-//    dvc.transitioningDelegate = self;
-//    dvc.modalPresentationStyle = UIModalPresentationCustom;
-//    [self presentViewController:dvc animated:YES completion:nil];
+    }
 }
 
 -(void)session:(QBRTCSession *)session hungUpByUser:(NSNumber *)userID userInfo:(NSDictionary *)userInfo {
+    NSLog(@"---%@---",userInfo);
 
+     NSString *dialogID = userInfo[@"DialogID"];
+    MainTableViewCell *cell;
+    for (QBChatDialog *dialog in self.textMessages) {
+        if ([dialog.ID isEqualToString:dialogID]) {
+            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:[self.textMessages indexOfObject:dialog] inSection:0];
+            cell = [self.tableView cellForRowAtIndexPath:indexPath];
+            [self.liveIndexPaths addObject:indexPath];
+            break;
+        }
+    }
+
+    cell.isLiveIndicator.hidden = true;
+    [self.tableView reloadData];
 
 }
 -(void)sessionDidClose:(QBRTCSession *)session {
+    self.currentSession = nil;
+    self.sessionToAccept = nil;
+
 }
 
 @end

@@ -32,6 +32,8 @@
 @property (weak, nonatomic) IBOutlet UINavigationItem *navTitle;
 
 @property (strong, nonatomic) NSMutableArray *messageArray;
+@property (strong, nonatomic) NSMutableArray *userPhotos;
+
 @property NSString *userFullName;
 @property QBChatDialog *userDialogs;
 @property NSInteger passedUserId;
@@ -39,7 +41,6 @@
 @property QBChatMessage *messageToBeUsed;
 
 @property (strong, nonatomic) QBRTCSession *session;
-@property (weak, nonatomic) IBOutlet UIView *oponentVIew;
 
 
 -(void)moveViewWithGestureRecognizer:(UIPanGestureRecognizer *)panGestureRecognizer;
