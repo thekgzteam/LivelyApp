@@ -13,5 +13,7 @@
 @property (nonatomic, strong) NSMutableArray *users;
 
 + (instancetype)instance;
+//- (QBUUser *)userWithID:(NSNumber *)userID;
+
 
 @end

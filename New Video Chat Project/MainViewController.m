@@ -450,6 +450,8 @@
         dvc.session = self.currentSession;
         dvc.imageForRightBar = self.imageToDialogVC;
         dvc.session = self.sessionToAccept;
+        [segue.destinationViewController hidesBottomBarWhenPushed];
+        dvc.navigationController.navigationBarHidden = YES;
     }
 }
 

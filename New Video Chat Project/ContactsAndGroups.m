@@ -44,6 +44,7 @@
 
 @property NSMutableArray *groups2;
 @property NSMutableDictionary *sectionContentDict2;
+@property NSMutableArray *userPhotos;
 
 @property NSMutableArray *phoneNumberArray;
 @property NSMutableArray *groupOfContacts;
@@ -62,6 +63,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
+
+    self.userPhotos = [NSMutableArray arrayWithCapacity:[Storage instance].users.count];
+    for (id o in [Storage instance].users) {
+        [self.userPhotos addObject:[NSNull null]];
+    }
 
     [self.segmentedControl setBackgroundImage:[self imageWithColor:[UIColor clearColor]] forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
     [self.segmentedControl setBackgroundImage:[self imageWithColor:[UIColor colorWithWhite:1.0 alpha:1.0]]  forState:UIControlStateSelected  barMetrics:UIBarMetricsDefault];
@@ -92,8 +98,20 @@
     l_backButton.title = @"Go Back";
 
 
+    QBUUser *userEdilAshimov;
+    userEdilAshimov.ID = 6639323;
+
     // REMOVING CURRENT USER FROM LIST OF ALL FETCHED USERS
     [[Storage instance].users removeObject:[QBSession currentSession].currentUser];
+//    for ( userEdilAshimov in [Storage instance].users) {
+//        if ([[Storage instance].users mutableCopy] containsObject:userEdilAshimov) {
+//            <#statements#>
+//        }
+//        [[[Storage instance].users mutableCopy]  removeObject:userEdilAshimov];
+//    }
+    [[Storage instance].users removeObject:userEdilAshimov];
+
+
 
     // LOCAL CONTACT LIST
     self.groupOfContacts = [@[] mutableCopy];
@@ -370,13 +388,13 @@
 
 - (UITableViewCell *)tableView: (UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 
-    // QUESTION 5
-
     ContactsAndGroupsTableViewCell *cell =[tableView dequeueReusableCellWithIdentifier:@"contactscellid"];
+    UIImage *photo = [self.userPhotos objectAtIndex:indexPath.row];
 
     cell.backgroundView.backgroundColor = [UIColor colorWithRed:238/255.0f green:238/255.0f blue:238/255.0f alpha:1.0];
     cell.backgroundColor = [UIColor colorWithRed:103/255.0f green:128/255.0f blue:159/255.0f alpha:1.0];
     cell.contactsName.textColor = [UIColor whiteColor];
+
 
     NSArray *content2 = [self.sectionContentDict2 valueForKey:[self.groups2 objectAtIndex:indexPath.section]];
 
@@ -388,41 +406,42 @@
                 QBUUser *user = [content2 objectAtIndex:indexPath.row];
                 cell.contactsName.text = user.fullName;
 
-//                NSArray *userids = [NSArray arrayWithArray:[Storage instance].users];
-//                [QBRequest usersWithIDs:userids page:[QBGeneralResponsePage responsePageWithCurrentPage:1 perPage:10] successBlock:^(QBResponse *response, QBGeneralResponsePage *page, NSArray *users) {
-//                    for (QBUUser *user in users) {
-//                        NSUInteger userProfilePictureID = user.blobID;
-//
-//                        [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
-//                            if (fileData == nil) {
-                                cell.contactsImage.image = [UIImage imageNamed:@"Profile Picture-1"];
-//                            }
-//                            else
-//                            cell.contactsImage.image = [UIImage imageWithData:fileData];
-//                            
-//                        } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
-//                            nil;
-//                        } errorBlock:^(QBResponse * _Nonnull response) {
-//                        }];
-//                    }
 
-//                } errorBlock:^(QBResponse *response) {
-//                    // Handle error here
-//                }];
+                if (![photo isEqual:[NSNull null]]) {
+                    cell.contactsImage.image = photo;
+                } else {
+
+                    __weak ContactsAndGroups *wSelf = self;
+                    NSUInteger userProfilePictureID = user.blobID;
+                        [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
+
+                            UIImage *userImage = [UIImage imageWithData:fileData];
+
+                            if (userImage == nil) {
+                                cell.contactsImage.image = [UIImage imageNamed:@"Profile Picture-1"];
+//                                [wSelf.userPhotos insertObject:[UIImage imageNamed:@"Profile Picture-1"] atIndex:indexPath.row];
+
+                            } else {
+
+                                [wSelf.userPhotos insertObject:userImage atIndex:indexPath.row];
+                                }
+                            cell.contactsImage.image = [wSelf.userPhotos objectAtIndex:indexPath.row];
+
+                        } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
+                            nil;
+                        } errorBlock:^(QBResponse * _Nonnull response) {
+                    }];
+                }
 
                 NSInteger currentTimeInterval = [[NSDate date] timeIntervalSince1970];
                 NSInteger userLastRequestAtTimeInterval   = [[user lastRequestAt] timeIntervalSince1970];
 
-//            TO DO  1 , USER ONlINE
                 if((currentTimeInterval - userLastRequestAtTimeInterval) < 30){
                     cell.userOnlineIndicatorLabel.enabled = YES;
                     cell.userOnlineIndicatorLabel.hidden = NO;
         [cell.userOnlineIndicatorLabel.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
                 }
-//                else
-//                    cell.userOnlineIndicatorLabel.enabled = NO;
-//                cell.userOnlineIndicatorLabel.hidden = YES;
-                }
+            }
                 break;
             case 1: {
                 CNContact *contact = [content2 objectAtIndex:indexPath.row];
@@ -494,6 +513,7 @@
     NSIndexPath *selectedIndexPath = [self.tableView indexPathForSelectedRow];
     ContactsAndGroupsTableViewCell *cell = [self.tableView cellForRowAtIndexPath:selectedIndexPath];
     modalVC.userFullName = cell.contactsName.text;
+    modalVC.userImage = cell.contactsImage.image;
 
     [self presentViewController:modalVC animated:YES completion:nil];
 }

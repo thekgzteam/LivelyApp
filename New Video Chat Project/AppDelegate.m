@@ -26,6 +26,8 @@ const NSTimeInterval kQBDialingTimeInterval = 1000.f;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
+
+
     [QBSettings setApplicationID:30638];
     [QBSettings setAuthKey:@"Ab7jmnDcEB3KSVH"];
     [QBSettings setAuthSecret:@"d2jBQAgrBhtFvH6"];
@@ -34,10 +36,10 @@ const NSTimeInterval kQBDialingTimeInterval = 1000.f;
     [QBSettings setLogLevel:QBLogLevelDebug];
 
 
-
     // Is user is signed in proceed to MainVC
     UIStoryboard *main = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
     __kindof UIViewController *initialVC;
+    
 
     if ([QBSession currentSession].currentUser) {
         initialVC = [main instantiateViewControllerWithIdentifier:@"SWRevealVC"];
@@ -48,7 +50,7 @@ const NSTimeInterval kQBDialingTimeInterval = 1000.f;
     self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     self.window.rootViewController = initialVC;
     [self.window makeKeyAndVisible];
-
+   
      [QBSettings setLogLevel:QBLogLevelNothing];
 
     //QuickbloxWebRTC preferences

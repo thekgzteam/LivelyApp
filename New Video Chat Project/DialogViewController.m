@@ -20,6 +20,7 @@
 #import "POP.h"
 #import <UIImageView+WebCache.h>
 #import "ContentView.h"
+#import "Storage.h"
 
 
 #pragma mark - ALL OTHER IMPORTED VIEWS
@@ -31,13 +32,24 @@
 #import "PrivateChatUserInfo.h"
 #import "DIalogSettingViewController.h"
 #import <mach/mach.h>
+#import "OpponentCollectionViewCell.h"
+#import "OpponentsFlowLayout.h"
+
+NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionViewCellIdentifier";
+
+
+
 
 @class QBRTCRemoteVideoView;
+@class QBRTCVideoRenderer;
+@class QBRTCSampleBufferView;
+@class  QBRTCSampleBufferRenderer;
 @class QBRTCVideoTrack;
 @class QBRTCStatsReport;
 @class QBChat;
-@interface DialogViewController ()  <UINavigationControllerDelegate, UIImagePickerControllerDelegate, QBChatDelegate, QBRTCClientDelegate, UIActionSheetDelegate, UIViewControllerTransitioningDelegate, UIPopoverPresentationControllerDelegate, UIGestureRecognizerDelegate>
+@interface DialogViewController ()  <UINavigationControllerDelegate, UIImagePickerControllerDelegate, QBChatDelegate, QBRTCClientDelegate, UIActionSheetDelegate, UIViewControllerTransitioningDelegate, UIPopoverPresentationControllerDelegate, UIGestureRecognizerDelegate,UICollectionViewDataSource, UICollectionViewDelegateFlowLayout>
 
+@property (weak, nonatomic) IBOutlet UICollectionView *opponentsCollectionView;
 @property OutgointTableViewCell *outgoingCell;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property UIActionSheet *actionSheet;
@@ -65,6 +77,10 @@
 @property (weak, nonatomic) IBOutlet UIView *myScreen;
 @property (strong, nonatomic) QBRTCCameraCapture *videoCapture;
 @property (weak, nonatomic) IBOutlet QBRTCRemoteVideoView *opponentsView;
+@property UIView *videoView;
+
+@property (weak, nonatomic) IBOutlet UIStackView *stackView;
+
 @property (weak, nonatomic) IBOutlet QBRTCRemoteVideoView *remoteVideoViewOne;
 
 @property (strong, nonatomic) NSMutableDictionary *videoViews;
@@ -88,9 +104,16 @@
 
 }
 
+-(void)viewWillAppear:(BOOL)animated
+{
+    
+    [self.navigationController setNavigationBarHidden:YES animated:YES];
+  }
+
 - (void)viewDidLoad {
     [super viewDidLoad];
 
+    // for table View not to have Inset space from top
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.tableView.contentInset = UIEdgeInsetsMake(100, 0, 0, 0);
 
@@ -119,7 +142,6 @@
     [self.myScreen.layer insertSublayer:self.videoCapture.previewLayer atIndex:0];
 
     self.videoCapture.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-
     self.myScreen.backgroundColor = [UIColor clearColor];
     self.myScreen.layer.borderColor = [UIColor whiteColor].CGColor;
     self.myScreen.layer.borderWidth = 2.0f;
@@ -144,12 +166,6 @@
                                                  name:@"updateTableContentInset"
                                                object:nil];
 
-    // UI CUSTOMIZATION
-    [self.rightbarButton setBackgroundImage:self.imageForRightBar forState:UIControlStateNormal];
-    [self.rightbarButton setFrame:CGRectMake(300, 27, 39, 39)];
-    [self.rightbarButton setClipsToBounds:YES];
-    self.rightbarButton.layer.cornerRadius = 19.0f;
-    [self.dialogSettings setFrame:CGRectMake(260, 27, 43, 39)];
 
     self.imageViewBehindBlur.image = self.imageForRightBar;
     self.imageViewBehindBlur.backgroundColor = [UIColor clearColor];
@@ -158,18 +174,7 @@
 
 
     //UI CUSTOM FOR OPONNENT VIDEO VIEWS
-   
-//    self.user2.layer.cornerRadius = 30;
-//    self.user2.layer.masksToBounds = YES;
-//    self.user2.layer.borderColor = [[UIColor whiteColor]CGColor];
-//    self.user2.layer.borderWidth = 0.7;
-//    self.user2.hidden = YES;
-//
-//    self.user3.layer.cornerRadius = 30;
-//    self.user3.layer.masksToBounds = YES;
-//    self.user3.layer.borderColor = [[UIColor whiteColor]CGColor];
-//    self.user3.layer.borderWidth = 0.7;
-//    self.user3.hidden = YES;
+
 
     self.remoteVideoViewOne.layer.cornerRadius = 26;
     self.remoteVideoViewOne.layer.masksToBounds = YES;
@@ -183,7 +188,14 @@
     self.chatTextView.layer.cornerRadius = 8.f;
     self.chatTextView.layer.borderColor = [[UIColor grayColor] CGColor];
     self.chatTextView.layer.borderWidth = 0.5f;
-    [self.navTitleButton setTitle:self.userFullName forState:UIControlStateNormal];
+
+    [self.navTitleButton setBackgroundImage:self.imageForRightBar forState:UIControlStateNormal];
+    [self.navTitleButton setClipsToBounds:YES];
+    self.navTitleButton.layer.cornerRadius = 19.0f;
+    [self.navTitleButton setBackgroundColor:[UIColor clearColor]];
+    self.navTitleButton.layer.borderColor = [UIColor whiteColor].CGColor;
+    self.navTitleButton.layer.borderWidth = 0.5f;
+
 
     // GESTURE RECOGNIZER METHODS FOR ALL
     UITapGestureRecognizer *tapRecognizer = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(visualEffectTapped:)];
@@ -237,8 +249,13 @@
     }];
 }
 
+
+
 - (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
+
+[self.navigationController setNavigationBarHidden:NO];
+
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -959,40 +976,116 @@
 #pragma mark -
 #pragma mark QBRTCClientDelegate
 
+- (void)setVideoView:(UIView *)videoView {
 
-
-- (void)acceptCall {
-    NSDictionary *userInfo = @{@"acceptCall" : @"userInfo"};
-    [self.session acceptCall:userInfo];
+    if (_videoView != videoView) {
+        [_videoView removeFromSuperview];
+        _videoView = videoView;
+        _videoView.frame = self.opponentsView.bounds;
+        [self.opponentsView insertSubview:self.videoView atIndex:1];
+    }
 }
 
-//Called in case when receive remote video track from opponent
-- (void)session:(QBRTCSession *)session receivedRemoteVideoTrack:(QBRTCVideoTrack *)videoTrack fromUser:(NSNumber *)userID {
+- (UIView *)videoViewWithOpponentID:(NSNumber *)opponentID {
+
+    if (self.session.conferenceType == QBRTCConferenceTypeAudio) {
+        return nil;
+    }
 
     if (!self.videoViews) {
         self.videoViews = [NSMutableDictionary dictionary];
     }
 
-    NSLog(@"--session----%@", session);
-    [SVProgressHUD showSuccessWithStatus:@"received a remote videotrack from user"];
-    self.opponentsView.contentMode = UIViewContentModeScaleAspectFill;
-    self.remoteVideoViewOne.contentMode = UIViewContentModeScaleAspectFill;
+    id result = self.videoViews[opponentID];
 
-    QBRTCVideoTrack *remoteVideoTrak1 = [session remoteVideoTrackWithUserID:@7613327];
-    [self.opponentsView setVideoTrack:remoteVideoTrak1];
+        QBRTCRemoteVideoView *remoteVideoView = nil;
 
-    QBRTCVideoTrack *remoteVideoTrak2 = [session remoteVideoTrackWithUserID:@7261406];
-    [self.remoteVideoViewOne setVideoTrack:remoteVideoTrak2];
+        QBRTCVideoTrack *remoteVideoTrak = [self.session remoteVideoTrackWithUserID:opponentID];
 
-//    if (!result && remoteVideoTrak) {
-//        remoteVideoView = [[QBRTCRemoteVideoView alloc]initWithFrame:self.remoteVideoViewOne.bounds];
-//        self.videoViews[userID] = remoteVideoView;
-//        result = remoteVideoView;
-//    }
+        if (!result && remoteVideoTrak) {
+
+            remoteVideoView = [[QBRTCRemoteVideoView alloc] initWithFrame:self.view.bounds];
+            self.videoViews[opponentID] = remoteVideoView;
+            result = remoteVideoView;
+        }
+
+        [remoteVideoView setVideoTrack:remoteVideoTrak];
+
+        return result;
+    }
 
 
-//    [self.imageViewBehindBlur.layer addAnimation:[self remoteVideoReceivedImage] forKey:@"remoteVideoReceivedImage"];
+- (void)acceptCall {
+    NSDictionary *userInfo = @{@"acceptCall" : @"userInfo"};
+    [self.session acceptCall:userInfo];
+
 }
+
+- (NSIndexPath *)indexPathAtUserID:(NSNumber *)userID {
+
+    QBUUser *user = [self userWithID:userID];
+    NSUInteger idx = [[Storage instance].users indexOfObject:user];
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:idx inSection:0];
+
+    return indexPath;
+
+}
+- (QBUUser *)userWithID:(NSNumber *)userID {
+
+    NSPredicate *userWithIDPredicate = [NSPredicate predicateWithFormat:@"ID == %@", userID];
+    return [[[Storage instance].users filteredArrayUsingPredicate:userWithIDPredicate] firstObject];
+}
+- (void)performUpdateUserID:(NSNumber *)userID block:(void(^)(OpponentCollectionViewCell *cell))block {
+
+    NSIndexPath *indexPath = [self indexPathAtUserID:userID];
+    OpponentCollectionViewCell *cell = (id)[self.opponentsCollectionView cellForItemAtIndexPath:indexPath];
+    block(cell);
+}
+
+//Called in case when receive remote video track from opponent
+- (void)session:(QBRTCSession *)session receivedRemoteVideoTrack:(QBRTCVideoTrack *)videoTrack fromUser:(NSNumber *)userID {
+
+    if (session == self.session) {
+
+        QBRTCRemoteVideoView *opponentVideoView = (id)[self videoViewWithOpponentID:userID];
+
+//                [self.opponentsView insertSubview:opponentVideoView atIndex:1];
+
+//        if (self.videoView) {
+//            [self.opponentsView addSubview:opponentVideoView];
+//        }
+//        else {
+            [self performUpdateUserID:userID block:^(OpponentCollectionViewCell *cell) {
+
+            QBRTCRemoteVideoView *opponentVideoView = (id)[self videoViewWithOpponentID:userID];
+            [cell setVideoView:opponentVideoView];
+             [self setVideoView:opponentVideoView];
+                   }];
+        }
+
+    }
+
+
+#pragma mark - UICollectionViewDataSource
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+
+    return 2
+    ;
+}
+
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+
+    OpponentCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:kOpponentCollectionViewCellIdentifier
+                                                                                 forIndexPath:indexPath];
+    QBUUser *user = [Storage instance].users[indexPath.row];
+
+    [cell setVideoView:[self videoViewWithOpponentID:@(user.ID)]];
+
+
+    return cell;
+}
+
 
 -(void)session:(QBRTCSession *)session initializedLocalMediaStream:(QBRTCMediaStream *)mediaStream {
     [SVProgressHUD showSuccessWithStatus:@"initialized media stream"];

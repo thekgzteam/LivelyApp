@@ -15,6 +15,7 @@
 @property NSString *userIdString;
 @property NSInteger *userIDForChat;
 @property NSString *idForDialog;
+@property UIImage *userImage;
 
 @end
 

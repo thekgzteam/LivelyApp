@@ -41,7 +41,8 @@
 		FD3DFD311BF6B22400E93192 /* NMPaginator.m in Sources */ = {isa = PBXBuildFile; fileRef = FD3DFD2D1BF6B22400E93192 /* NMPaginator.m */; settings = {ASSET_TAGS = (); }; };
 		FD3DFD321BF6B22400E93192 /* Storage.m in Sources */ = {isa = PBXBuildFile; fileRef = FD3DFD2F1BF6B22400E93192 /* Storage.m */; settings = {ASSET_TAGS = (); }; };
 		FD455A981BE0855E000B181A /* ProfileMenuTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD455A971BE0855E000B181A /* ProfileMenuTableViewCell.m */; settings = {ASSET_TAGS = (); }; };
-		FD5411321C0F5F8F0072780B /* OpponentCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5411311C0F5F8F0072780B /* OpponentCollectionViewCell.m */; settings = {ASSET_TAGS = (); }; };
+		FD4BA6781C23337700D3F27B /* OpponentCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD4BA6751C23337700D3F27B /* OpponentCollectionViewCell.m */; settings = {ASSET_TAGS = (); }; };
+		FD4BA6791C23337700D3F27B /* OpponentsFlowLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = FD4BA6771C23337700D3F27B /* OpponentsFlowLayout.m */; settings = {ASSET_TAGS = (); }; };
 		FD549A471C1D55C5000199E5 /* ContentView.m in Sources */ = {isa = PBXBuildFile; fileRef = FD549A461C1D55C5000199E5 /* ContentView.m */; settings = {ASSET_TAGS = (); }; };
 		FD5C1BD71C154DED00BD52B0 /* DIalogSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5C1BD61C154DED00BD52B0 /* DIalogSettingViewController.m */; settings = {ASSET_TAGS = (); }; };
 		FD5F09221C09F65A00737225 /* GroupChatInfoPopOver.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5F09211C09F65A00737225 /* GroupChatInfoPopOver.m */; settings = {ASSET_TAGS = (); }; };
@@ -212,8 +213,10 @@
 		FD3DFD2F1BF6B22400E93192 /* Storage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Storage.m; sourceTree = "<group>"; };
 		FD455A961BE0855E000B181A /* ProfileMenuTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProfileMenuTableViewCell.h; sourceTree = "<group>"; };
 		FD455A971BE0855E000B181A /* ProfileMenuTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProfileMenuTableViewCell.m; sourceTree = "<group>"; };
-		FD5411301C0F5F8F0072780B /* OpponentCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpponentCollectionViewCell.h; sourceTree = "<group>"; };
-		FD5411311C0F5F8F0072780B /* OpponentCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpponentCollectionViewCell.m; sourceTree = "<group>"; };
+		FD4BA6741C23337700D3F27B /* OpponentCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpponentCollectionViewCell.h; sourceTree = "<group>"; };
+		FD4BA6751C23337700D3F27B /* OpponentCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpponentCollectionViewCell.m; sourceTree = "<group>"; };
+		FD4BA6761C23337700D3F27B /* OpponentsFlowLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpponentsFlowLayout.h; sourceTree = "<group>"; };
+		FD4BA6771C23337700D3F27B /* OpponentsFlowLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OpponentsFlowLayout.m; sourceTree = "<group>"; };
 		FD549A451C1D55C5000199E5 /* ContentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContentView.h; sourceTree = "<group>"; };
 		FD549A461C1D55C5000199E5 /* ContentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContentView.m; sourceTree = "<group>"; };
 		FD5C1BD51C154DED00BD52B0 /* DIalogSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DIalogSettingViewController.h; sourceTree = "<group>"; };
@@ -516,14 +519,16 @@
 		FD0E09151BFAF21D00A768D4 /* DIalogVC */ = {
 			isa = PBXGroup;
 			children = (
-				FD549A451C1D55C5000199E5 /* ContentView.h */,
-				FD549A461C1D55C5000199E5 /* ContentView.m */,
 				FD691DB61BE886BF003D56FC /* DialogViewController.h */,
 				FD691DB71BE886BF003D56FC /* DialogViewController.m */,
+				FD4BA6741C23337700D3F27B /* OpponentCollectionViewCell.h */,
+				FD4BA6751C23337700D3F27B /* OpponentCollectionViewCell.m */,
+				FD4BA6761C23337700D3F27B /* OpponentsFlowLayout.h */,
+				FD4BA6771C23337700D3F27B /* OpponentsFlowLayout.m */,
 				FD5C1BD51C154DED00BD52B0 /* DIalogSettingViewController.h */,
 				FD5C1BD61C154DED00BD52B0 /* DIalogSettingViewController.m */,
-				FD5411301C0F5F8F0072780B /* OpponentCollectionViewCell.h */,
-				FD5411311C0F5F8F0072780B /* OpponentCollectionViewCell.m */,
+				FD549A451C1D55C5000199E5 /* ContentView.h */,
+				FD549A461C1D55C5000199E5 /* ContentView.m */,
 				FDAE6C311C08CCD400399489 /* UserImageVC.h */,
 				FDAE6C321C08CCD400399489 /* UserImageVC.m */,
 				FD2B520F1C0D3920005F76E5 /* ChatInfoPopOverVC */,
@@ -895,13 +900,13 @@
 				FD5F09401C0AB85900737225 /* PrivateChatUserInfo.m in Sources */,
 				FD07AA1B1BE174E3005EB685 /* ProfileSettingsViewController.m in Sources */,
 				FD691DB81BE886BF003D56FC /* DialogViewController.m in Sources */,
-				FD5411321C0F5F8F0072780B /* OpponentCollectionViewCell.m in Sources */,
 				FDAE6C211C06429800399489 /* QCMethod.m in Sources */,
 				FD0D18821BF1362A0034FDC1 /* POPAnimatableProperty.mm in Sources */,
 				FD71D2521BD048250056EA7F /* MainViewController.m in Sources */,
 				FD0D18921BF1362A0034FDC1 /* POPVector.mm in Sources */,
 				FD3DFD301BF6B22400E93192 /* UsersPaginator.m in Sources */,
 				FDAE6C301C08853700399489 /* CustomView.m in Sources */,
+				FD4BA6791C23337700D3F27B /* OpponentsFlowLayout.m in Sources */,
 				FD0E09091BF9E4A300A768D4 /* IncomingTableViewCell.m in Sources */,
 				FD5F09491C0C7C3200737225 /* GroupInfoCell.m in Sources */,
 				FD0D18891BF1362A0034FDC1 /* POPBasicAnimation.mm in Sources */,
@@ -931,6 +936,7 @@
 				FD32C94C1BD7A8EC0098E0DF /* PresentingAnimationController.m in Sources */,
 				FD0D18841BF1362A0034FDC1 /* POPAnimationEvent.mm in Sources */,
 				FD0D188C1BF1362A0034FDC1 /* POPDecayAnimation.mm in Sources */,
+				FD4BA6781C23337700D3F27B /* OpponentCollectionViewCell.m in Sources */,
 				FD0D18871BF1362A0034FDC1 /* POPAnimationTracer.mm in Sources */,
 				FD0D18881BF1362A0034FDC1 /* POPAnimator.mm in Sources */,
 				FD5F09461C0B572700737225 /* UserInfoCell.m in Sources */,

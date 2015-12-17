@@ -33,7 +33,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
+    self.userProfileImage.image = self.userImage;
     self.userIdString = [[NSString alloc]init];
     self.userProfileName.text = self.userFullName;
     self.view.layer.cornerRadius = 8.f;

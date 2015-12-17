@@ -28,8 +28,6 @@
 @property UIImage *imageForRightBar;
 @property (weak, nonatomic) IBOutlet UIButton *takePicButton;
 @property (weak, nonatomic) IBOutlet UIButton *sendMessageButton;
-@property (weak, nonatomic) IBOutlet UINavigationBar *customNavBar;
-@property (weak, nonatomic) IBOutlet UINavigationItem *navTitle;
 
 @property (strong, nonatomic) NSMutableArray *messageArray;
 @property (strong, nonatomic) NSMutableArray *userPhotos;
@@ -42,6 +40,7 @@
 
 @property (strong, nonatomic) QBRTCSession *session;
 
+- (QBUUser *)userWithID:(NSNumber *)userID;
 
 -(void)moveViewWithGestureRecognizer:(UIPanGestureRecognizer *)panGestureRecognizer;
 -(void)handlePinchWithGestureRecognizer:(UIPinchGestureRecognizer *)pinchGestureRecognizer;
