@@ -200,6 +200,12 @@
 
     MainTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"maincellid"];
 
+    CGFloat r = (float)rand()/RAND_MAX;
+    CGFloat g = (float)rand()/RAND_MAX;
+    CGFloat b = (float)rand()/RAND_MAX;
+    UIColor *newColor = [UIColor colorWithRed:r green:g blue:b alpha:1.0];
+    cell.colorLabel.backgroundColor = newColor;
+
     if(cell == nil)
     {
         cell = [[MainTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"maincellid"];

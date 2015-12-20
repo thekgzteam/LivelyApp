@@ -15,7 +15,7 @@
 - (void)awakeFromNib {
     // Initialization code
     self.profileImage.layer.backgroundColor=[[UIColor clearColor] CGColor];
-    self.profileImage.layer.cornerRadius = 20;
+//    self.profileImage.layer.cornerRadius = 20;
     self.profileImage.layer.masksToBounds = YES;
     self.profileImage.layer.borderColor=[[UIColor redColor] CGColor];
     self.unreadMessagesCountLabel.layer.cornerRadius = 10;

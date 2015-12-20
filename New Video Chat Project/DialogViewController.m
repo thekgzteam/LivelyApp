@@ -267,9 +267,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     self.viewForTableCellFadeEffect.layer.mask = gradient;
 }
 
-
-
-
 // FETCH MESSAGES FROM QUICKBLOX
 - (void)retrievingMessages {
     __weak DialogViewController *wSelf = self;
@@ -295,17 +292,15 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 
 #pragma mark - METHOD TO AUTOMATICALLY SCROLL TABLE VIEW DOWN WHEN IT APPEARS
 - (void)scrollTableViewUp {
-    //Always scroll the chat table when the user sends the message
-    if([self.tableView numberOfRowsInSection:0]!=0)
-    {
-        NSIndexPath* ip = [NSIndexPath indexPathForRow:[self.tableView numberOfRowsInSection:0]-1 inSection:0];
-        [self.tableView scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionBottom animated:UITableViewRowAnimationLeft];
-    }
-}
+    //SCROLL TO BOTTOM
+    double y = self.tableView.contentSize.height - self.tableView.bounds.size.height;
+    CGPoint bottomOffset = CGPointMake(0, y);
+    NSLog(@"after = %f", y);
+    if (y > -self.tableView.contentInset.top)
+        [self.tableView setContentOffset:bottomOffset animated:YES];}
 
 #pragma mark -
 #pragma mark USER INTERACTION
-
 
 // RESIGN FIRST RESPONDER WHEN TOUCHED OUTSIDE OF TABLE VIEW
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -318,6 +313,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 }
 
 - (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
+
     [self scrollTableViewUp];
 
      if (self.session) {
@@ -355,7 +351,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 //                                                        object:self];
     [self.session hangUp:@{ @"DialogID" : self.userDialogs.ID}];
     [self dismissViewControllerAnimated:YES completion:nil];
-    
+
 }
 //
 //- (void)didReceiveNewSession:(QBRTCSession *)session userInfo:(NSDictionary *)userInfo {
@@ -376,7 +372,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 //SENDING MESSAGE
 - (IBAction)sendMessageButton:(id)sender {
 
-
     if([self.chatTextView.text length]!=0)
     {
         self.sendMessageButton.enabled = true;
@@ -392,7 +387,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 
     __weak DialogViewController *wSelf = self;
     [QBRequest createMessage:message successBlock:^(QBResponse *response, QBChatMessage *createdMessage) {
-
 
         [wSelf.messageArray addObject:createdMessage];
 

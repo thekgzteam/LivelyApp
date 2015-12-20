@@ -15,6 +15,6 @@
 @property (weak, nonatomic) IBOutlet UILabel *textMessage;
 @property (weak, nonatomic) IBOutlet UILabel *unreadMessagesCountLabel;
 @property (weak, nonatomic) IBOutlet UIButton *isLiveIndicator;
-
+@property (weak, nonatomic) IBOutlet UILabel *colorLabel;
 
 @end
