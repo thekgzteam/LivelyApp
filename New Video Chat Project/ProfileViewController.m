@@ -20,13 +20,12 @@
 
 
 
-
 @interface ProfileViewController ()<MFMailComposeViewControllerDelegate>
 
 @property (weak, nonatomic) IBOutlet UIButton *settingsButton;
 @property (weak, nonatomic) IBOutlet UIImageView *profilePic;
 @property (weak, nonatomic) IBOutlet UILabel *profileName;
-@property (weak, nonatomic) IBOutlet UIButton *profileDescription;
+@property (weak, nonatomic) IBOutlet UILabel *profileDescription;
 @property (weak, nonatomic) IBOutlet UIButton *logOutButton;
 @property (weak, nonatomic) IBOutlet UIButton *shareButton;
 @property (weak, nonatomic) IBOutlet UIButton *sendFeedbackButton;
@@ -41,7 +40,38 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
+    NSUInteger userProfilePictureID = [QBSession currentSession].currentUser.blobID;
+    [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse *  response, NSData *fileData) {
+        NSLog(@"--------%@------",fileData);
+
+        self.activityIndicator.hidden = YES;
+        [self.activityIndicator stopAnimating];
+        self.profilePic.image = [UIImage imageWithData:fileData];
+    } statusBlock:^(QBRequest *  request, QBRequestStatus *  status) {
+        NSLog(@"--------%@------",status.description);
+
+
+    } errorBlock:^(QBResponse *  response) {
+        NSLog(@"--------%@------",response.error);
+    }];
+
+
+    [QBRequest userWithID:[QBSession currentSession].currentUser.ID successBlock:^(QBResponse *response, QBUUser *user) {
+
+        if (user.website == nil) {
+            self.profileDescription.text = @"I Love Lively";
+        } else {
+            NSString *str = user.website;
+            NSString *newStr = [str substringFromIndex:7];
+            self.profileDescription.text = newStr;
+        }
+        self.profileName.text = user.fullName;
+
+    } errorBlock:^(QBResponse *response) {
+    }];
+
+
     self.profilePic.layer.cornerRadius = 60;
     self.profilePic.layer.masksToBounds = YES;
     self.profilePic.layer.borderColor=[[UIColor whiteColor] CGColor];
@@ -53,35 +83,12 @@
     self.logOutButton.layer.cornerRadius = 70;
     self.logOutButton.layer.masksToBounds = YES;
 
-    QBUUser *currentuser = [QBSession currentSession].currentUser;
-    NSUInteger userProfilePictureID = currentuser.blobID; // user - an instance of QBUUser class
-
-    [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
-        self.activityIndicator.hidden = YES;
-        [self.activityIndicator stopAnimating];
-        self.profilePic.image = [UIImage imageWithData:fileData];
-
-    } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
-        nil;
-    } errorBlock:^(QBResponse * _Nonnull response) {
-        NSLog(@"-----error gettin pR image----%@---------------", response.error);
-    }];
-
-    [QBRequest userWithID:[QBSession currentSession].currentUser.ID successBlock:^(QBResponse *response, QBUUser *user) {
-        self.profileName.text = user.fullName;
-    } errorBlock:^(QBResponse *response) {
-    }];
 
 
 }
 
--(void)viewDidAppear:(BOOL)animated {
-    [super viewDidAppear:animated];
-
-    self.activityIndicator.hidden = NO;
-    [self.activityIndicator startAnimating];
-
-
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:YES];
 
     [self.profilePic.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
     [self.profileName.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
@@ -93,7 +100,6 @@
     [self.logOutButton.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
     [self.settingsButton.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
 
-
     [self.profileDescription.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
     [self.shareButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
     [self.sendFeedbackButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
@@ -101,6 +107,17 @@
     [self.legalButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
     [self.logOutButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
     [self.settingsButton.layer addAnimation:[self rotationAnimation] forKey:@"rotationAnimation"];
+
+}
+
+
+-(void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+
+
+    self.activityIndicator.hidden = NO;
+    [self.activityIndicator startAnimating];
+
 
    }
 
@@ -111,10 +128,10 @@
                                              selector:@selector(didDismissSecondViewController)
                                                  name:@"SecondViewControllerDismissed"
                                                object:nil];
+
     ProfileSettingsViewController *modalVC = [self.storyboard instantiateViewControllerWithIdentifier:@"profileSettings"];
-    modalVC.transitioningDelegate = self;
-    modalVC.modalPresentationStyle = UIModalPresentationCustom;
-    [self presentViewController:modalVC animated:YES completion:nil];
+    modalVC.modalPresentationStyle = UIModalPresentationOverCurrentContext;
+    [self presentViewController:modalVC animated:NO completion:nil];
 
 }
 

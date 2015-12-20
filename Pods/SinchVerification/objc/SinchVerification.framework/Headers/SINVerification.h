@@ -13,19 +13,29 @@
  *
  * ### Example
  *
- * 	id<SINVerification> verification = [SINVerification SMSVerificationWithApplicationKey:@"<APPKEY>"
- * 	                                                                          phoneNumber:@"+14155550101""];
+ * 	 NSError *error = nil;
+ * 	 id<SINPhoneNumber> phoneNumber = [SINPhoneNumberUtil() parse:@"415 555 0101"
+ * 	                                              defaultRegion:@"US"
+ * 	                                                      error:&error];
+ * 	 
+ * 	 NSString* phoneNumberE164 = [SINPhoneNumberUtil() formatNumber:phoneNumber
+ * 	                                                         format:SINPhoneNumberFormatE164];
  *
- * 	[self.verification initiateWithCompletionHandler:^(BOOL success, NSError *error) {
- * 	  // verification initiated, user will now receive an SMS to their phone.
- * 	}];
+ * 	 id<SINVerification> verification = [SINVerification SMSVerificationWithApplicationKey:@"<APPKEY>"
+ * 	                                                                          phoneNumber:phoneNumberE164];
  *
- * 	NSString* code; // get user to input code received in SMS
+ * 	 [self.verification initiateWithCompletionHandler:^(BOOL success, NSError *error) {
+ * 	   // verification initiated, user will now receive an SMS to their phone.
+ * 	 }];
  *
- * 	[self.verification verifyCode:(NSString*) code completionHandler:^(BOOL success, NSError *error) {
- * 	  // verification completed
- * 	}];
+ * 	 NSString* code; // get user to input code received in SMS
+ *
+ * 	 [self.verification verifyCode:(NSString*) code completionHandler:^(BOOL success, NSError *error) {
+ * 	   // verification completed
+ * 	 }];
  */
+
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol SINVerification;
 
@@ -46,9 +56,10 @@ SIN_EXPORT
  *                    "+14155550101", where the '+' is the required prefix and the US country
  *                    code '1' added before the local subscriber number.
  *
+ * @see SINPhoneNumberUtil for formatting a phone number in E.164 format.
+ *
  */
-+ (nonnull id<SINVerification>)SMSVerificationWithApplicationKey:(nonnull NSString*)applicationKey
-                                                     phoneNumber:(nonnull NSString*)phoneNumber;
++ (id<SINVerification>)SMSVerificationWithApplicationKey:(NSString*)applicationKey phoneNumber:(NSString*)phoneNumber;
 
 /**
  * Instantiate a new SMS-based verification.
@@ -70,10 +81,12 @@ SIN_EXPORT
  *                    (If complex data is to be passed along, it must first be encoded as a
  *                    NSString*, e.g. encoded as JSON or Base64.)
  *
+ * @see SINPhoneNumberUtil for formatting a phone number in E.164 format.
+ *
  */
-+ (nonnull id<SINVerification>)SMSVerificationWithApplicationKey:(nonnull NSString*)applicationKey
-                                                     phoneNumber:(nonnull NSString*)phoneNumber
-                                                          custom:(nonnull NSString*)custom;
++ (id<SINVerification>)SMSVerificationWithApplicationKey:(NSString*)applicationKey
+                                             phoneNumber:(NSString*)phoneNumber
+                                                  custom:(NSString*)custom;
 
 /**
  * Instantiate a new Callout-based verification. The Sinch backend
@@ -90,9 +103,11 @@ SIN_EXPORT
  *                    "+14155550101", where the '+' is the required prefix and the US country
  *                    code '1' added before the local subscriber number.
  *
+ * @see SINPhoneNumberUtil for formatting a phone number in E.164 format.
+ *
  */
-+ (nonnull id<SINVerification>)calloutVerificationWithApplicationKey:(nonnull NSString*)applicationKey
-                                                         phoneNumber:(nonnull NSString*)phoneNumber;
++ (id<SINVerification>)calloutVerificationWithApplicationKey:(NSString*)applicationKey
+                                                 phoneNumber:(NSString*)phoneNumber;
 
 /**
  * Instantiate a new Callout-based verification. The Sinch backend
@@ -115,15 +130,17 @@ SIN_EXPORT
  *                    (If complex data is to be passed along, it must first be encoded as a
  *                    NSString*, e.g. encoded as JSON or Base64.)
  *
+ * @see SINPhoneNumberUtil for formatting a phone number in E.164 format.
+ *
  */
-+ (nonnull id<SINVerification>)calloutVerificationWithApplicationKey:(nonnull NSString*)applicationKey
-                                                         phoneNumber:(nonnull NSString*)phoneNumber
-                                                              custom:(nonnull NSString*)custom;
++ (id<SINVerification>)calloutVerificationWithApplicationKey:(NSString*)applicationKey
+                                                 phoneNumber:(NSString*)phoneNumber
+                                                      custom:(NSString*)custom;
 
 /**
  * Returns the Sinch Verification SDK version.
  */
-+ (nonnull NSString*)version;
++ (NSString*)version;
 
 /**
  * Set a log callback block.
@@ -148,7 +165,7 @@ SIN_EXPORT
  *
  * @param completionHandler Block that will be invoked upon successful initiation.
  */
-- (void)initiateWithCompletionHandler:(void (^__nonnull)(BOOL success, NSError* __nullable error))completionHandler;
+- (void)initiateWithCompletionHandler:(void (^)(BOOL success, NSError* __nullable error))completionHandler;
 
 /**
  * Complete the verification by verifying the verification code sent to the user.
@@ -157,8 +174,8 @@ SIN_EXPORT
  *
  * @param completionHandler Block that will be invoked upon successful initiation.
  */
-- (void)verifyCode:(nonnull NSString*)code
-    completionHandler:(void (^__nonnull)(BOOL success, NSError* __nullable error))completionHandler;
+- (void)verifyCode:(NSString*)code
+    completionHandler:(void (^)(BOOL success, NSError* __nullable error))completionHandler;
 
 /**
  * Cancel the verification (client-side only).
@@ -166,13 +183,13 @@ SIN_EXPORT
  * Note that cancelling is a client-side only action, i.e. it will not send any
  * further requests to the Sinch platform and it does not guarantee that a SMS
  * or a callout won't be made to the user's device. What it will do is cancel any
- * long-polling requests that this verification instance may be maintaining (e.g. 
+ * long-polling requests that this verification instance may be maintaining (e.g.
  * a callout verification is performing polling to query the Sinch platform for
  * the status of the verification)
  *
  * If the verification is in a state where a completion handler have been specified,
  * the handler will be invoked with the error code SINVerificationErrorCancelled.
- *
+ *
  */
 - (void)cancel;
 
@@ -183,7 +200,7 @@ SIN_EXPORT
  * @param environmentHost Host for base URL for the Sinch API environment to be used. E.g. 'sandbox.sinch.com'
  */
 @required
-- (void)setEnvironmentHost:(nonnull NSString*)environmentHost;
+- (void)setEnvironmentHost:(NSString*)environmentHost;
 
 /**
  * Specify a dispatch queue on which `completionHandler` blocks of a SINVerification
@@ -193,14 +210,16 @@ SIN_EXPORT
  * @param completionQueue GCD dispatch queue
  */
 @required
-- (void)setCompletionQueue:(nonnull dispatch_queue_t)completionQueue;
+- (void)setCompletionQueue:(dispatch_queue_t)completionQueue;
 
 @end
 
 // NSNotifications that can be used to observe progress of a verification
-SIN_EXTERN NSString* __nonnull const SINVerificationDidBeginInitiatingNotification;
-SIN_EXTERN NSString* __nonnull const SINVerificationDidEndInitiatingNotification;
-SIN_EXTERN NSString* __nonnull const SINVerificationDidBeginVerifyingCodeNotification;
-SIN_EXTERN NSString* __nonnull const SINVerificationDidEndVerifyingCodeNotification;
-SIN_EXTERN NSString* __nonnull const SINVerificationDidBeginVerifyingCalloutNotification;
-SIN_EXTERN NSString* __nonnull const SINVerificationDidEndVerifyingCalloutNotification;
+SIN_EXTERN NSString* const SINVerificationDidBeginInitiatingNotification;
+SIN_EXTERN NSString* const SINVerificationDidEndInitiatingNotification;
+SIN_EXTERN NSString* const SINVerificationDidBeginVerifyingCodeNotification;
+SIN_EXTERN NSString* const SINVerificationDidEndVerifyingCodeNotification;
+SIN_EXTERN NSString* const SINVerificationDidBeginVerifyingCalloutNotification;
+SIN_EXTERN NSString* const SINVerificationDidEndVerifyingCalloutNotification;
+
+NS_ASSUME_NONNULL_END

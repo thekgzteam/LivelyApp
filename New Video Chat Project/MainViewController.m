@@ -29,7 +29,7 @@
 #import "ContactsAndGroups.h"
 #import "IncomingViewController.h"
 
-@interface MainViewController () <UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate, NMPaginatorDelegate, QBChatDelegate, QBRTCClientDelegate>
+@interface MainViewController () <UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate, NMPaginatorDelegate, QBChatDelegate, QBRTCClientDelegate,UISearchControllerDelegate, UISearchResultsUpdating, UISearchBarDelegate>
 
 @property (nonatomic, strong) UsersPaginator *paginator;
 @property (weak, nonatomic) IBOutlet UILabel *numberOfDialogs;
@@ -37,8 +37,8 @@
 @property (strong, nonatomic) UINavigationController *nav;
 @property (weak, nonatomic) QBRTCSession *currentSession;
 @property (weak, nonatomic) QBRTCSession *sessionToAccept;
-
-
+@property (strong, nonatomic) IBOutlet UISearchController *searchControllers;
+@property NSArray *filteredResults;
 @property (weak, nonatomic) IBOutlet UILabel *allTextsButtonAndNumberOfDialogs;
 
 @end
@@ -47,6 +47,12 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+
+    self.searchControllers = [[UISearchController alloc] initWithSearchResultsController:nil];
+    self.searchControllers.searchResultsUpdater = self;
+    self.searchControllers.delegate = self;
+    self.searchControllers.dimsBackgroundDuringPresentation = false;
+    [self.searchControllers.searchBar  sizeToFit];
 
     self.liveIndexPaths = [NSMutableArray new];
 
@@ -102,6 +108,9 @@
 - (void)viewDidAppear:(BOOL)animated {
         [super viewDidAppear:animated];
 
+    NSLog(@"----------%ld------", [QBSession currentSession].currentUser.ID);
+
+
 #pragma mark - CONNECTING TO CHAT AND WEBRTCVIDEO
 
     [QBRTCClient initializeRTC];
@@ -115,7 +124,6 @@
     user.password = @"samplePassword";
 
     [[QBChat instance] connectWithUser:user completion:nil];
-
     __weak typeof(self)weakSelf = self;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -126,8 +134,6 @@
 
 - (void)receiveReloadTableViewNotification:(NSNotification *) notification {
     [self loadDialogs];
-
-    [SVProgressHUD showSuccessWithStatus:@"tableView is reloading"];
 }
 
 #pragma mark - QBCHAT DIALOG METHODS -
@@ -175,7 +181,15 @@
 #pragma mark - TABLE VIEW METHODS -
 
 - (NSInteger)tableView: (UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return self.textMessages.count;
+
+    if (self.searchControllers.active) {
+        return self.filteredResults.count;
+    }
+    else
+    {
+        return self.textMessages.count;
+    }
+
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView  {
@@ -185,6 +199,13 @@
 - (MainTableViewCell *)tableView: (UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 
     MainTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"maincellid"];
+
+    if(cell == nil)
+    {
+        cell = [[MainTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"maincellid"];
+
+    }
+
     QBChatDialog *allDialogs = [self.textMessages objectAtIndex:indexPath.row];
     UIImage *photo = [self.userPhotos objectAtIndex:indexPath.row];
 
@@ -206,7 +227,6 @@
 //            if (![photo isEqual:[NSNull null]]) {
 //                cell.profileImage.image = photo;
 //            } else {
-
                 NSUInteger indexID = [allDialogs.photo integerValue];
                 __weak MainViewController *wSelf = self;
                 [QBRequest downloadFileWithID:indexID successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
@@ -235,9 +255,18 @@
         };
 //               cell.profileImage.image = [UIImage imageNamed:@"group icon-1"];
 
+
+
+               if (self.searchControllers.active) {
+                   QBChatDialog *allDialogs = [self.filteredResults objectAtIndex:indexPath.row];
+                   cell.profileName.text = allDialogs.name;
+                   return cell;
+               }
+               else
+               {
             cell.profileName.text = allDialogs.name;
             cell.textMessage.text = allDialogs.lastMessageText;
-
+               }
             if ([result isEqualToString:@"Today"]) {
                 cell.timeOfMessage.text = startTimeString;
 
@@ -351,6 +380,18 @@
     return cell;
 }
 
+- (void)updateSearchResultsForSearchController:(UISearchController *)searchController {
+
+    NSLog(@"%@", searchController.searchBar.text);
+    NSPredicate *predicate = [NSPredicate predicateWithFormat: @"SELF.text contains[c] %@",searchController.searchBar.text];
+
+    NSArray *array = [self.textMessages filteredArrayUsingPredicate:predicate];
+    self.filteredResults = (NSArray *)array;
+    NSLog(@"%li", array.count);
+    [self.tableView reloadData];
+
+}
+
 #pragma mark - USER INTERACTION -
 
 - (IBAction)createGroupChat:(id)sender {
@@ -429,9 +470,7 @@
         
         self.currentSession = session;
         self.sessionToAccept = session;
-        [QBRequest sendPushWithText:[[self senderDisplayName] stringByAppendingString:@" is Live 🎥 "] toUsers:[opponentsIDs mutableCopy] successBlock:nil errorBlock:^(QBError *error) {
-        }];
-
+        
         [self performSegueWithIdentifier:@"openDialogSeg" sender:self];
     }
     else {
@@ -498,21 +537,18 @@
     }
 
     if (self.currentSession) {
+
+            [session rejectCall:@{@"reject" : @"busy"}];
         [SVProgressHUD showSuccessWithStatus:@"call is rejected"];
-        [session rejectCall:@{@"reject" : @"busy"}];
         return;
+
     } else {
 
         self.currentSession = session;
         self.sessionToAccept = session;
-
-
     cell.isLiveIndicator.hidden = false;
-       
+        [SVProgressHUD showSuccessWithStatus:@"🎥"];
 
-
-        [SVProgressHUD showSuccessWithStatus:@"call is coming"];
-        [self.tableView reloadData];
     }
 }
 
@@ -538,6 +574,29 @@
     self.currentSession = nil;
     self.sessionToAccept = nil;
 
+}
+
+
+
+-(void)chatDidReadMessageWithID:(NSString *)messageID dialogID:(NSString *)dialogID readerID:(NSUInteger)readerID {
+
+
+
+
+}
+
+
+
+
+
+- (void)chatDidReceiveSystemMessage:(QBChatMessage *)message{
+
+    [self.tableView reloadData];//    [self.messageArray addObject:message];
+//    [self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:self.messageArray.count -1 inSection:0]] withRowAnimation:UITableViewRowAnimationLeft];
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"updateTableContentInset"
+                                                        object:self];
+    
 }
 
 @end

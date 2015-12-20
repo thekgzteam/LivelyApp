@@ -13,5 +13,6 @@
 @property (weak, nonatomic) IBOutlet UILabel *arrowLabel;
 @property (weak, nonatomic) IBOutlet UIImageView *profileImageincom;
 @property (weak, nonatomic) IBOutlet UILabel *incomingMessageTime;
+@property (weak, nonatomic) IBOutlet UILabel *timeLabel;
 
 @end

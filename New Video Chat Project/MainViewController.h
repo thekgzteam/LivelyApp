@@ -15,8 +15,7 @@
 
 @property NSArray *username;
 @property NSMutableArray *images;
-@property NSArray *textMessages;
-@property NSArray *filteredResults;
+@property NSMutableArray *textMessages;
 @property NSMutableArray *userPhotos;
 @property NSMutableArray *userPrivatePhotos;
 
@@ -31,6 +30,7 @@
 @property QBChatDialog *userDialogToBePassed;
 @property NSString *navBarTitle;
 @property UIImage *imageToDialogVC;
+
 
 @end
 

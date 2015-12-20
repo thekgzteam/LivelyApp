@@ -27,6 +27,7 @@
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (strong, nonatomic) id<SINVerification> verification;
 @property NSString *myUserId;
+@property AppDelegate *appDelegate;
 @end
 
 @implementation RegistrationViewController
@@ -68,6 +69,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
+    [self restrictRotation:YES];
 
     // ScrollView -
 
@@ -123,6 +125,12 @@
     self.scrollView.autoresizingMask =  UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
 
 
+}
+
+-(void) restrictRotation:(BOOL) restriction
+{
+    AppDelegate* appDelegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
+    appDelegate.restrictRotation = restriction;
 }
 
 #pragma mark - user interaction -

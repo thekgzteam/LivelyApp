@@ -13,18 +13,19 @@
 #import <Quickblox/Quickblox.h>
 #import "SVProgressHUD.h"
 
-@interface IntroToProfileViewController ()
+@interface IntroToProfileViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate,UIActionSheetDelegate,UITextFieldDelegate>
 
 @property (weak, nonatomic) IBOutlet UIButton *ProfileDoneButton;
 @property (weak, nonatomic) IBOutlet UITextField *EnterNameTextfield;
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
-@property UIImage *image;
-@property UIImagePickerController *picker2;
-@property UIImagePickerController *picker;
+
 @property (weak, nonatomic) IBOutlet UILabel *statusLabel;
 @property NSArray *objects;
 @property UIActionSheet *actionSheet;
+@property UIImage *image;
+@property UIImagePickerController *pickerController;
 
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *skipButton;
 
 @end
 
@@ -36,6 +37,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [self.EnterNameTextfield.delegate self];
+
     [self.actionSheet.delegate self];
 
     self.imageView.layer.backgroundColor=[[UIColor clearColor] CGColor];
@@ -78,31 +81,22 @@
 }
 
 
-#pragma - user interaction -
-- (IBAction)ChooseExisting {
-    self.picker2 =[[UIImagePickerController alloc] init];
-    self.picker2.delegate = self;
-    [self.picker setSourceType:UIImagePickerControllerSourceTypePhotoLibrary];
-    [self presentViewController:self.picker2 animated:YES completion:NULL];
+#pragma mark - ImagePicker Controller
+
+- (void)takePhoto {
+    self.pickerController = [[UIImagePickerController alloc] init];
+    self.pickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
+    self.pickerController.delegate = self;
+    self.pickerController.allowsEditing = YES;
+    [self presentViewController:self.pickerController animated:YES completion:nil];
 }
 
-- (IBAction)Camera {
-    self.picker =[[UIImagePickerController alloc] init];
-    self.picker.delegate = self;
-    [self.picker setSourceType:UIImagePickerControllerSourceTypeCamera];
-    [self presentViewController:self.
-     picker animated:YES completion:NULL];
-
-}
-
--(void) imagePickerControllerDidCancel:(UIImagePickerController *)picker {
-    [self dismissViewControllerAnimated:YES completion:NULL];
-}
-
--(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
-    self.image = [info objectForKey:UIImagePickerControllerOriginalImage];
-    [self.imageView setImage:self.image];
-    [self dismissViewControllerAnimated:YES completion:NULL];
+- (void)choosePhotoFromLibrary {
+    self.pickerController = [[UIImagePickerController alloc] init];
+    self.pickerController.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
+    self.pickerController.delegate = self;
+    self.pickerController.allowsEditing = YES;
+    [self presentViewController:self.pickerController animated:YES completion:nil];
 }
 
 - (IBAction)updateUserInfo:(id)sender {
@@ -113,20 +107,16 @@
     if (self.EnterNameTextfield.text.length > 0)
         updateParameters.fullName = self.EnterNameTextfield.text;
 
-    // your file - this is an image in our case
-    NSData * imageData = UIImageJPEGRepresentation (self.imageView.image, 0.7);
 
-     [QBRequest TUploadFile:imageData fileName:@"Profile Picture"  contentType:@"image/jpeg" isPublic:YES successBlock:^(QBResponse *response, QBCBlob *blob) {
+ NSData * imageData = UIImageJPEGRepresentation (self.imageView.image, 0.15);
+ [QBRequest TUploadFile: imageData fileName: @"ProfilePicture"
+            contentType: @"image/png"
+               isPublic: YES successBlock: ^ (QBResponse * response, QBCBlob * blob) {
 
+             updateParameters.blobID = [blob ID];
+        [QBRequest updateCurrentUser:updateParameters successBlock:^(QBResponse * _Nonnull response, QBUUser * _Nullable user) {
+                [self performSegueWithIdentifier:@"MainScreenSeg" sender:self];
 
-         NSLog(@"-----------------Image is Uploaded---------------");
-        // File uploaded, do something
-        // if blob.isPublic == YES
-        QBUpdateUserParameters *params = [QBUpdateUserParameters new];
-        params.blobID = [QBSession currentSession].currentUser.blobID;
-
-
-        [QBRequest updateCurrentUser:params successBlock:^(QBResponse * _Nonnull response, QBUUser * _Nullable user) {
             NSLog(@"------>>>>>>>>>>>>>>successfully updated image<<<<<<");
             // success block
         } errorBlock:^(QBResponse * _Nonnull response) {
@@ -140,42 +130,64 @@
         NSLog(@"error: %@", response.error);
     }];
 
-    [QBRequest updateCurrentUser:updateParameters successBlock:^(QBResponse *response, QBUUser *user) {
-        [SVProgressHUD showSuccessWithStatus:@"Saved"];
-        [self performSegueWithIdentifier:@"MainScreenSeg" sender:self];
-
-    } errorBlock:^(QBResponse *response) {
-        [SVProgressHUD dismiss];
-
-        NSLog(@"Errors=%@", [response.error description]);
-        [SVProgressHUD showSuccessWithStatus:[response.error description]];
-    }];
 }
 
-- (IBAction)showNormalActionSheet:(id)sender {
+- (IBAction)showPhotoMenu:(id)sender {
 
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
 
-    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:@"Choose Actions?"
-                                                             delegate:self
-                                                    cancelButtonTitle:@"Cancel"
-                                               destructiveButtonTitle:@"Take a Picture"
-                                                    otherButtonTitles:@"Photo Library", nil];
-    [actionSheet showInView:self.view];
+        self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                       delegate:self
+                                              cancelButtonTitle:@"Cancel"
+                                         destructiveButtonTitle:nil
+                                              otherButtonTitles:@"Take Photo", @"Choose From Library", nil];
 
+        [self.actionSheet showInView:self.view];
 
+    } else {
 
-}
--(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
-    if (actionSheet.tag == 1) {
-        [self Camera];
+        [self choosePhotoFromLibrary];
     }
-    else if (actionSheet.tag == 2){
-        [self ChooseExisting];
-    }
-
-    [self Camera], [self ChooseExisting] , buttonIndex, [actionSheet buttonTitleAtIndex:buttonIndex];
 }
 
+#pragma mark - Image
+
+- (void)showImage:(UIImage *)image {
+
+    self.imageView.image = image;
+}
+
+#pragma mark - UIImagePickerController Delegate
+
+- (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+
+
+    self.image = info[UIImagePickerControllerEditedImage];
+    [self showImage:self.image];
+
+    [self dismissViewControllerAnimated:YES completion:nil];
+
+
+}
+
+
+- (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
+
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+#pragma mark - UIActionSheet Delegate
+
+- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
+
+    if (buttonIndex == 0) {
+        [self takePhoto];
+
+    } else if (buttonIndex == 1) {
+        [self choosePhotoFromLibrary];
+    }
+    self.actionSheet = nil;
+}
 
 - (IBAction)onSkipButtonPressed:(id)sender {
     [self performSegueWithIdentifier:@"MainScreenSeg" sender:nil];
@@ -186,5 +198,9 @@
         mainVC.myUserId = self.EnterNameTextfield.text;
     }
 }
+
+-(void)textFieldDidBeginEditing:(UITextField *)textField {
+
+ }
 
 @end

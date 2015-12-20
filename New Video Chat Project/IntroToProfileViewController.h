@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface IntroToProfileViewController : UIViewController <UIImagePickerControllerDelegate, UINavigationControllerDelegate,UIActionSheetDelegate>
+@interface IntroToProfileViewController : UIViewController 
 @property NSString *myUserId;
 - (IBAction)ChooseExisting;
 @property NSNumber *phoneDigits;

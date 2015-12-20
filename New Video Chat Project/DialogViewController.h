@@ -15,14 +15,8 @@
 
 @class QBRTCSession;
 
-@protocol DialogVCDelegate;
-
 @interface DialogViewController : UIViewController <UITextViewDelegate, UITableViewDataSource, UITableViewDelegate>
 
-
-@property (weak, nonatomic) id <DialogVCDelegate> delegate;
-
-- (instancetype)initWithPreviewlayer:(AVCaptureVideoPreviewLayer *)layer;
 
 @property (weak, nonatomic) IBOutlet ContentView *contentView;
 @property UIImage *imageForRightBar;
@@ -40,23 +34,12 @@
 
 @property (strong, nonatomic) QBRTCSession *session;
 
-- (QBUUser *)userWithID:(NSNumber *)userID;
-
 -(void)moveViewWithGestureRecognizer:(UIPanGestureRecognizer *)panGestureRecognizer;
 -(void)handlePinchWithGestureRecognizer:(UIPinchGestureRecognizer *)pinchGestureRecognizer;
 -(void)handleSingleTapGesture:(UITapGestureRecognizer *)tapGestureRecognizer;
 -(void)doubleTapGesture:(UITapGestureRecognizer *)tapGestureRecognizer2;
 
-- (IBAction)expandOrShrinkView:(id)sender;
-
-
 
 @end
 
-@protocol DialogVCDelegate  <NSObject>
 
-- (void)localVideoView:(DialogViewController *)localVideoView pressedSwitchButton:(UIButton *)sender;
-
-- (void)reloadTableView;
-
-@end

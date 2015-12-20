@@ -32,4 +32,5 @@ typedef NS_ENUM(NSUInteger, QBRendererType) {
  */
 - (void)setVideoTrack:(QBRTCVideoTrack *)videoTrack;
 
+
 @end

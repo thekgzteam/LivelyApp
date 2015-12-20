@@ -16,12 +16,12 @@ PODS:
     - FBSDKCoreKit/arc
   - FBSDKLoginKit (4.8.0):
     - FBSDKCoreKit
-  - QuickBlox (2.6.0.1)
+  - QuickBlox (2.6.1)
   - Quickblox-WebRTC (2.1.1)
   - SDWebImage (3.7.3):
     - SDWebImage/Core (= 3.7.3)
   - SDWebImage/Core (3.7.3)
-  - SinchVerification (1.3.3)
+  - SinchVerification (1.4.1)
   - SVProgressHUD (1.1.3)
 
 DEPENDENCIES:
@@ -36,10 +36,10 @@ SPEC CHECKSUMS:
   Bolts: 722ab9a4f8b50fc4ed1b9998a5a7a2b3f16d80b4
   FBSDKCoreKit: 66a935d17b6e00b6b64e604f2eb9b72c9ab7deb8
   FBSDKLoginKit: d893fcbb98d854496925e9ff73c67b896982d3c4
-  QuickBlox: 5a202f4b0ba45f6829e3145e48dbc3fe9fa39df6
+  QuickBlox: 870ae1b33cc4f0687b0fff6a29438a12f1c4f7d5
   Quickblox-WebRTC: e0ce2b16a793d16e86cfacb5b3fdb08d944ac77b
   SDWebImage: 1d2b1a1efda1ade1b00b6f8498865f8ddedc8a84
-  SinchVerification: 30ff1c755bf302d2a57c0c24f5d1972cc249a326
+  SinchVerification: 184531db297fc80d53af94c48ccd1777a8ae77f6
   SVProgressHUD: 748080e4f36e603f6c02aec292664239df5279c1
 
 COCOAPODS: 0.39.0

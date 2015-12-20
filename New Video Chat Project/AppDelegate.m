@@ -16,6 +16,7 @@
 
 @interface AppDelegate ()
 
+
 @end
 
 @implementation AppDelegate
@@ -23,6 +24,14 @@
 const NSTimeInterval kQBAnswerTimeInterval = 1000.f;
 const NSTimeInterval kQBRTCDisconnectTimeInterval = 30.f;
 const NSTimeInterval kQBDialingTimeInterval = 1000.f;
+
+-(NSUInteger)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
+{
+    if(self.restrictRotation)
+        return UIInterfaceOrientationMaskPortrait;
+    else
+        return UIInterfaceOrientationMaskAll;
+}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 

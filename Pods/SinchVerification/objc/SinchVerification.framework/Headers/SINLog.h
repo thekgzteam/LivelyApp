@@ -9,6 +9,10 @@
 
 #import "SINLogSeverity.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 typedef void (^SINLogCallback)(SINLogSeverity severity, NSString* area, NSString* message, NSDate* timestamp);
+
+NS_ASSUME_NONNULL_END
 
 #endif  // SIN_LOG_H

@@ -17,6 +17,8 @@
 @property (weak, nonatomic) IBOutlet UIImageView *chosenImage;
 @property (weak, nonatomic) IBOutlet UILabel *arrowLabel;
 @property (weak, nonatomic) IBOutlet UITextView *outgoingLabel;
+@property (weak, nonatomic) IBOutlet UILabel *timeLabel;
+
 
 
 @end

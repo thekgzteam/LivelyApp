@@ -108,6 +108,7 @@
         dvc.userFullName = self.userFullName;
         dvc.userDialogs = self.privateChat;
         dvc.passedUserId = self.userIDForChat;
+        dvc.imageForRightBar = self.userImage;
     }
 }
 

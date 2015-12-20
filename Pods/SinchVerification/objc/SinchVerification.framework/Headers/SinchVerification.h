@@ -11,3 +11,8 @@
 #import "SINVerificationError.h"
 #import "SINLog.h"
 #import "SINLogSeverity.h"
+#import "SINPhoneNumber.h"
+#import "SINPhoneNumberUtil.h"
+#import "SINDeviceRegion.h"
+#import "SINUITextFieldPhoneNumberFormatter.h"
+#import "SINRegionInfo.h"
