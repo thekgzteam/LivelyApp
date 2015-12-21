@@ -12,7 +12,7 @@
 
 
 
-@interface ProfileSettingsViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate,UIActionSheetDelegate>
+@interface ProfileSettingsViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate,UIActionSheetDelegate, UIGestureRecognizerDelegate>
 
 @property (weak, nonatomic) IBOutlet UIImageView *profileImage;
 @property (weak, nonatomic) IBOutlet UIButton *editProfileButton;
@@ -34,6 +34,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+
+    UITapGestureRecognizer *singleTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGesture:)];
+    [self.profileImage addGestureRecognizer:singleTapGestureRecognizer];
+    singleTapGestureRecognizer.numberOfTapsRequired = 1;
+    singleTapGestureRecognizer.delegate = self;
 
     // UI DESIGN
     self.saveChangesButton.hidden = YES;
@@ -107,6 +112,23 @@
     self.saveChangesButton.hidden = NO;
 }
 
+-(void)tapGesture:(UITapGestureRecognizer *)tapGestureRecognizer2 {
+
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+
+        self.actionSheet = [[UIActionSheet alloc] initWithTitle:nil
+                                                       delegate:self
+                                              cancelButtonTitle:@"Cancel"
+                                         destructiveButtonTitle:nil
+                                              otherButtonTitles:@"Take Photo", @"Choose From Library", @"Edit Name", @"Edit Status", nil];
+        [self.actionSheet showInView:self.view];
+    } else {
+        [self choosePhotoFromLibrary];
+    }
+
+}
+
+
 #pragma mark - USER INTERACTION
 - (IBAction)onDismissButtonPressed:(id)sender {
 
@@ -142,7 +164,7 @@
 }
 
 -(void)saveImage {
-    [SVProgressHUD showWithStatus:@"Saving"];
+//    [SVProgressHUD showWithStatus:@"Saving"];
     NSData * imageData = UIImageJPEGRepresentation (self.profileImage.image, 0.15);
     [QBRequest TUploadFile: imageData fileName: @"ProfilePicture"
                contentType: @"image/png"
@@ -154,7 +176,7 @@
                           [SVProgressHUD showSuccessWithStatus:@"Saved"];
                       } errorBlock:^(QBResponse * _Nonnull response) {
                           // error block
-                          NSLog(@"Failed to update user: %@", [response.error reasons]);
+//                          NSLog(@"Failed to update user: %@", [response.error reasons]);
                       }];
 
                                         }

@@ -40,6 +40,7 @@
 @property (strong, nonatomic) IBOutlet UISearchController *searchControllers;
 @property NSArray *filteredResults;
 @property (weak, nonatomic) IBOutlet UILabel *allTextsButtonAndNumberOfDialogs;
+@property (weak, nonatomic) IBOutlet UIButton *createGroupChatButton;
 
 @end
 
@@ -47,6 +48,19 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+
+    self.tableView.tableHeaderView.hidden = YES;
+
+//    UIView *buttonView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 88)];
+//    self.createGroupChatButton = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 320, 88)];
+//
+//    [buttonView addSubview:self.createGroupChatButton];
+//    self.tableView.tableHeaderView = buttonView;
+    self.automaticallyAdjustsScrollViewInsets = NO;
+    self.tableView.contentInset = UIEdgeInsetsMake(-44, 0, 0, 0);
+
+    self.createGroupChatButton.layer.borderColor = [[UIColor whiteColor] CGColor];
+    self.createGroupChatButton.layer.borderWidth = 1.5f;
 
     self.searchControllers = [[UISearchController alloc] initWithSearchResultsController:nil];
     self.searchControllers.searchResultsUpdater = self;
@@ -95,15 +109,36 @@
 
 #pragma mark - QBCHAT DIALOG METHODS -
 
+    // FETCHING CURRENT USER IMAGE FOR DIALOG CHATHEAD
+    QBUUser *currentuser = [QBSession currentSession].currentUser;
+    NSUInteger userProfilePictureID = currentuser.blobID; // user - an instance of QBUUser class
+
+    [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse *  response, NSData *fileData) {
+
+        self.currentUserImageToBePassed = [UIImage imageWithData:fileData];
+
+    } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
+        nil;
+    } errorBlock:^(QBResponse * _Nonnull response) {
+    }];
+
+
     // REQUEST FOR COUNT OF DIALOGS
     [QBRequest countOfDialogsWithExtendedRequest:nil successBlock:^(QBResponse *response, NSUInteger count) {
         NSString *integerAsString = [@(count) stringValue];
-        NSString *numberOfDialogs = [NSString stringWithFormat:@"All Texts (%@)", integerAsString];
+        NSString *numberOfDialogs = [NSString stringWithFormat:@"Messages (%@)", integerAsString];
         self.allTextsButtonAndNumberOfDialogs.text = numberOfDialogs;
             } errorBlock:^(QBResponse *response) {
     }];
         [self loadDialogs];
 }
+
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    self.tableView.tableHeaderView.hidden = NO;
+    self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
+}
+
 
 - (void)viewDidAppear:(BOOL)animated {
         [super viewDidAppear:animated];
@@ -127,7 +162,7 @@
     __weak typeof(self)weakSelf = self;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        [SVProgressHUD showWithStatus:@"Loading history"];
+//        [SVProgressHUD showWithStatus:@"Loading history"];
         [weakSelf.paginator fetchFirstPage];
     });
 }
@@ -169,13 +204,13 @@
 
 #pragma mark - CONNECTING TO CHAT
 - (void) chatDidConnect{
-    [SVProgressHUD showSuccessWithStatus:@"Successfully connected to chat"];
+//    [SVProgressHUD showSuccessWithStatus:@"Successfully connected to chat"];
     [QBSettings setKeepAliveInterval:30];
     [QBSettings setAutoReconnectEnabled:YES];
 }
 
 - (void)chatDidNotConnectWithError:(NSError *)error {
-    [SVProgressHUD showErrorWithStatus:@"Error connecting to chat"];
+//    [SVProgressHUD showErrorWithStatus:@"Error connecting to chat"];
 }
 
 #pragma mark - TABLE VIEW METHODS -
@@ -480,7 +515,7 @@
         [self performSegueWithIdentifier:@"openDialogSeg" sender:self];
     }
     else {
-        [SVProgressHUD showErrorWithStatus:@"You should login to use chat API. Session hasn’t been created. Please try to relogin the chat."];
+//        [SVProgressHUD showErrorWithStatus:@"You should login to use chat API. Session hasn’t been created. Please try to relogin the chat."];
     }
     }
 }
@@ -495,6 +530,7 @@
         dvc.session = self.currentSession;
         dvc.imageForRightBar = self.imageToDialogVC;
         dvc.session = self.sessionToAccept;
+        dvc.currentUserImage = self.currentUserImageToBePassed;
         [segue.destinationViewController hidesBottomBarWhenPushed];
         dvc.navigationController.navigationBarHidden = YES;
     }
@@ -545,7 +581,7 @@
     if (self.currentSession) {
 
             [session rejectCall:@{@"reject" : @"busy"}];
-        [SVProgressHUD showSuccessWithStatus:@"call is rejected"];
+        [SVProgressHUD showSuccessWithStatus:@"On Another Call"];
         return;
 
     } else {

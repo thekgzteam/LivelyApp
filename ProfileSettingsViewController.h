@@ -11,4 +11,6 @@
 @interface ProfileSettingsViewController : UIViewController
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 
+-(void)tapGesture:(UITapGestureRecognizer *)tapGestureRecognizer2;
+
 @end

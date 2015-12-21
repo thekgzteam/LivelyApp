@@ -96,7 +96,7 @@
     } errorBlock:^(QBResponse *response) {
         dispatch_async(dispatch_get_main_queue(), ^{
         });
-        [SVProgressHUD showErrorWithStatus:[response.error description]];
+//        [SVProgressHUD showErrorWithStatus:[response.error description]];
 
     }];    [[QBChat instance] addDelegate:self];
 

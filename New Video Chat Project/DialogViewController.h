@@ -17,7 +17,7 @@
 
 @interface DialogViewController : UIViewController <UITextViewDelegate, UITableViewDataSource, UITableViewDelegate>
 
-
+@property UIImage *currentUserImage;
 @property (weak, nonatomic) IBOutlet ContentView *contentView;
 @property UIImage *imageForRightBar;
 @property (weak, nonatomic) IBOutlet UIButton *takePicButton;

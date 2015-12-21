@@ -137,7 +137,7 @@
              NSString *login = self.phoneDigits;
 
 
-             [SVProgressHUD showWithStatus:@"Signing in"];
+//             [SVProgressHUD showWithStatus:@"Signing in"];
 
              [QBRequest signUp:user successBlock:^(QBResponse *response, QBUUser *user) {
 
@@ -160,7 +160,7 @@
 
 
                      NSLog(@"Errors=%@", [response.error description]);
-                     [SVProgressHUD showErrorWithStatus:[response.error description]];
+//                     [SVProgressHUD showErrorWithStatus:[response.error description]];
 
                  }];
 

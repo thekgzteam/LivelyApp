@@ -21,6 +21,7 @@
 #import <UIImageView+WebCache.h>
 #import "ContentView.h"
 #import "Storage.h"
+#import "QCMethod.h"
 
 
 #pragma mark - ALL OTHER IMPORTED VIEWS
@@ -48,6 +49,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 
     // TableView and Cells
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (weak, nonatomic) IBOutlet UIView *typingView;
 @property (weak, nonatomic) IBOutlet UITextView *chatTextView;
 @property (strong,nonatomic) ContentView *handler;
 @property (weak, nonatomic) IBOutlet UIView *viewForTableCellFadeEffect;
@@ -69,7 +71,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 
 // Image/Date Holder
 @property NSDate *sendMessageDate;
-@property UIImage *currentUserImage;
 @property UIImage *opponentImage;
 
 // Buttons
@@ -88,13 +89,16 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 @property (weak, nonatomic) IBOutlet UICollectionView *opponentsCollectionView;
 @property (weak, nonatomic) IBOutlet UIImageView *imageViewBehindBlur;
 @property (weak, nonatomic) IBOutlet UIVisualEffectView *visulaEffectBlur;
-
+@property (nonatomic, strong) CAShapeLayer *oval;
+@property (nonatomic, strong) CAShapeLayer *oval2;
+@property (nonatomic, strong) CAShapeLayer *oval3;
 
 @end
 
 @implementation DialogViewController
 
 @synthesize pickerController = _pickerController;
+
 
 - (void)dealloc {
     self.renderer = nil;
@@ -103,6 +107,45 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 - (void)viewDidLoad {
     [super viewDidLoad];
 
+    
+//    [self.tableView setContentOffset:CGPointMake(0, 88) animated:YES];
+    self.typingView.backgroundColor = [UIColor clearColor];
+    self.typingView.hidden = YES;
+
+    CAShapeLayer * oval = [CAShapeLayer layer];
+    oval.frame       = CGRectMake(11.33, 10, 5.31, 5.03);
+    oval.fillColor   = [UIColor colorWithRed:0.835 green: 0.722 blue:0.188 alpha:1].CGColor;
+    oval.strokeColor = [UIColor colorWithRed:0.835 green: 0.722 blue:0.188 alpha:1].CGColor;
+    oval.path        = [self ovalPath].CGPath;
+    [self.typingView.layer addSublayer:oval];
+    _oval = oval;
+
+    CAShapeLayer * oval2 = [CAShapeLayer layer];
+    oval2.frame       = CGRectMake(27.83, 10, 5.31, 5.03);
+    oval2.fillColor   = [UIColor colorWithRed:0.835 green: 0.722 blue:0.188 alpha:1].CGColor;
+    oval2.strokeColor = [UIColor colorWithRed:0.835 green: 0.722 blue:0.188 alpha:1].CGColor;
+    oval2.path        = [self oval2Path].CGPath;
+
+    [self.typingView.layer addSublayer:oval2];
+    _oval2 = oval2;
+
+    CAShapeLayer * oval3 = [CAShapeLayer layer];
+    oval3.frame       = CGRectMake(46.2, 10, 5.31, 5.03);
+    oval3.fillColor   = [UIColor colorWithRed:0.835 green: 0.722 blue:0.188 alpha:1].CGColor;
+    oval3.strokeColor = [UIColor colorWithRed:0.835 green: 0.722 blue:0.188 alpha:1].CGColor;
+    oval3.path        = [self oval3Path].CGPath;
+
+    [self.typingView.layer addSublayer:oval3];
+    _oval3 = oval3;
+
+
+    QBChatMessage *messageHistory;
+
+        if([messageHistory markable]){
+            [[QBChat instance] readMessage:messageHistory completion:^(NSError * _Nullable error) {
+    
+            }];
+        }
 
 //  SETTING DELEGATES
     self.chatTextView.delegate = self;
@@ -113,18 +156,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     [QBRTCConfig setDTLSEnabled:YES];
 
 
-// FETCHING CURRENT USER IMAGE FOR DIALOG CHATHEAD
-    QBUUser *currentuser = [QBSession currentSession].currentUser;
-    NSUInteger userProfilePictureID = currentuser.blobID; // user - an instance of QBUUser class
 
-    [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse *  response, NSData *fileData) {
-
-        self.currentUserImage = [UIImage imageWithData:fileData];
-
-    } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
-        nil;
-    } errorBlock:^(QBResponse * _Nonnull response) {
-    }];
 
 
 // LOCAL VIDEO SETTINGS
@@ -228,24 +260,86 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
         NSString *userString = [@(userID) stringValue];
         [QBRequest sendPushWithText:[[weakSelf senderDisplayName] stringByAppendingString:@" is Live 🎥 "] toUsers:userString successBlock:nil errorBlock:^(QBError *error) {
         }];
+        weakSelf.typingView.hidden = NO;
+        [self.oval addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
+        [self.oval2 addAnimation:[self oval2Animation] forKey:@"oval2Animation"];
+        [self.oval3 addAnimation:[self oval3Animation] forKey:@"oval3Animation"];
 
-        [weakSelf.messageArray addObject:@0];
 
-        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:weakSelf.messageArray.count -1 inSection:0];
-
-        [weakSelf.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationBottom];
-        [weakSelf.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:self.messageArray.count-1 inSection:0] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
+//        [weakSelf.messageArray addObject:@0];
+//
+//        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:weakSelf.messageArray.count -1 inSection:0];
+//
+//        [weakSelf.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationBottom];
+//        [weakSelf.tableView scrollToRowAtIndexPath:[NSIndexPath indexPathForRow:self.messageArray.count-1 inSection:0] atScrollPosition:UITableViewScrollPositionBottom animated:YES];
     }];
 
     // Handling user stopped typing.
     [self.userDialogs setOnUserStoppedTyping:^(NSUInteger userID) {
 
-        [weakSelf.messageArray removeObject:@0];
-        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:weakSelf.messageArray.count inSection:0];
-        [weakSelf.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationTop];
-        [weakSelf.tableView reloadData];
+        weakSelf.typingView.hidden = YES;
+
+//        [weakSelf.messageArray removeObject:@0];
+//        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:weakSelf.messageArray.count -1 inSection:0];
+//        [weakSelf.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationTop];
+//        [weakSelf.tableView reloadData];
     }];
 }
+#pragma mark - Bezier Path
+
+- (UIBezierPath*)ovalPath{
+    UIBezierPath*  ovalPath = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, 10, 10)];
+    return ovalPath;
+}
+
+- (UIBezierPath*)oval2Path{
+    UIBezierPath*  oval2Path = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, 10, 10)];
+    return oval2Path;
+}
+
+- (UIBezierPath*)oval3Path{
+    UIBezierPath*  oval3Path = [UIBezierPath bezierPathWithOvalInRect:CGRectMake(0, 0, 10, 10)];
+    return oval3Path;
+}
+
+    - (CAKeyframeAnimation*)ovalAnimation{CAKeyframeAnimation * opacityAnim = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+    opacityAnim.values                = @[@0, @1, @0, @0];
+    opacityAnim.keyTimes              = @[@0, @0.164, @0.356, @1];
+    opacityAnim.duration              = 1;
+    opacityAnim.fillMode = kCAFillModeForwards;
+    opacityAnim.removedOnCompletion = NO;
+        opacityAnim.repeatCount = 1000;
+
+    return opacityAnim;
+}
+
+- (CAKeyframeAnimation*)oval2Animation{
+    CAKeyframeAnimation * opacityAnim = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+    opacityAnim.values                = @[@0, @0, @0, @1, @0, @0];
+    opacityAnim.keyTimes              = @[@0, @0.022, @0.179, @0.342, @0.54, @1];
+    opacityAnim.duration              = 1.02;
+    opacityAnim.fillMode = kCAFillModeForwards;
+    opacityAnim.removedOnCompletion = NO;
+    opacityAnim.repeatCount = 1000;
+
+
+    return opacityAnim;
+}
+
+- (CAKeyframeAnimation*)oval3Animation{
+    CAKeyframeAnimation * opacityAnim = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+    opacityAnim.values                = @[@0, @0, @1, @0, @0];
+    opacityAnim.keyTimes              = @[@0, @0.502, @0.692, @0.888, @1];
+    opacityAnim.duration              = 1;
+    opacityAnim.fillMode = kCAFillModeForwards;
+    opacityAnim.removedOnCompletion = NO;
+    opacityAnim.repeatCount = 1000;
+
+
+    return opacityAnim;
+}
+
+
 
 - (NSString *)senderDisplayName {
     return [QBSession currentSession].currentUser.fullName;
@@ -285,7 +379,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
         dispatch_async(dispatch_get_main_queue(), ^{
         });
 
-        [SVProgressHUD showErrorWithStatus:@"error getting messages"];
         NSLog(@"error: %@", response.error);
     }];
 }
@@ -376,7 +469,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     {
         self.sendMessageButton.enabled = true;
 
-    QBChatMessage *message = [QBChatMessage message];
+    QBChatMessage *message = [QBChatMessage markableMessage];
     message.text = self.chatTextView.text;
     message.dialogID = self.userDialogs.ID;
 
@@ -413,7 +506,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
         if (y > -self.tableView.contentInset.top)
             [self.tableView setContentOffset:bottomOffset animated:YES];
 
-        [SVProgressHUD showSuccessWithStatus:@"Sent"];
+//        [SVProgressHUD showSuccessWithStatus:@"Sent"];
 
         NSUInteger userID = createdMessage.recipientID;
         NSString *userString = [NSString stringWithFormat:@"%ld", userID];
@@ -550,7 +643,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     [self.chatTextView endEditing:YES];
     [self.view resignFirstResponder];
     [self resignFirstResponder];
-
 }
 
 #pragma mark -
@@ -632,9 +724,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 }
 
 
-
-
-
 #pragma mark -
 #pragma mark  TABLE VIEW METHODS
 
@@ -655,13 +744,13 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     self.chatTextView.delegate = self;
 
     // CELLS THAT APPEARS WHEN USER STARTS TYPING
-    if ([[self.messageArray objectAtIndex:indexPath.row] isEqual:@0]) {
-        UserIsTypingCell *cell = [tableView dequeueReusableCellWithIdentifier:@"useristyping"];
-        cell.backgroundColor = cell.contentView.backgroundColor;
-        [cell.customView startAllAnimations:self];
-
-        return cell;
-    }
+//    if ([[self.messageArray objectAtIndex:indexPath.row] isEqual:@0]) {
+//        UserIsTypingCell *cell = [tableView dequeueReusableCellWithIdentifier:@"useristyping"];
+//        cell.backgroundColor = cell.contentView.backgroundColor;
+//        [cell.customView startAllAnimations:self];
+//
+//        return cell;
+//    }
 
 
     OutgointTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"outgoingCell"];
@@ -673,16 +762,17 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 
     QBChatMessage *messageHistory = [self.messageArray objectAtIndex:indexPath.row];
 
+//    if([messageHistory markable]){
+//        [[QBChat instance] readMessage:messageHistory completion:^(NSError * _Nullable error) {
+//
+//        }];
+//    }
+
     if (messageHistory.senderID == [QBSession currentSession].currentUser.ID) {
         cell.outgoingLabel.text = messageHistory.text;
 
         messageHistory.markable = true;
-//        // sends 'read' status back
-//        if([messageHistory markable]){
-//            [[QBChat instance] readMessage:messageHistory completion:^(NSError * _Nullable error) {
-//
-//            }];
-//        }
+
 
         NSDateFormatter *df = [[NSDateFormatter alloc] init];
         df.dateStyle = NSDateFormatterShortStyle;
@@ -712,13 +802,12 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 
         cell.chosenImage.image = self.imageView.image;
 
-        NSInteger sectionsAmount = [tableView numberOfSections];
-        NSInteger rowsAmount = [tableView numberOfRowsInSection:[indexPath section]];
+//        NSInteger sectionsAmount = [self.tableView numberOfSections];
+//        NSInteger rowsAmount = [self.tableView numberOfRowsInSection:[indexPath section]];
 //        if ([indexPath section] == sectionsAmount - 1 && [indexPath row] == rowsAmount - 1) {
 //
 //            [cell.statusIcon.layer addAnimation:[self imageAnimation] forKey:@"imageAnimation"];
 //            cell.statusIcon.image = [UIImage imageNamed:@"sentIcon"];
-//
 //        }
 
         return cell;
@@ -814,6 +903,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 
 - (void)chatDidReceiveSystemMessage:(QBChatMessage *)message{
 
+    [[QBChat instance] markAsDelivered:message];
     [self.messageArray addObject:message];
     [self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:self.messageArray.count -1 inSection:0]] withRowAnimation:UITableViewRowAnimationLeft];
 //    [self.tableView reloadData];
@@ -821,7 +911,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
                                                         object:self];
 
 }
-
 - (void)chatDidReceiveMessage:(QBChatMessage *)message {
     // the messages comes here from carbons
 //    [SVProgressHUD showSuccessWithStatus:@"message was received"];
@@ -837,9 +926,35 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 }
 - (void)chatDidReadMessageWithID:(NSString *)messageID dialogID:(NSString *)dialogID readerID:(NSUInteger)readerID {
 
-    self.outgoingCell.statusIcon.image = [UIImage imageNamed:@"readStatus"];
+    [SVProgressHUD showSuccessWithStatus:@"message was Read"];
 
-//    [SVProgressHUD showSuccessWithStatus:@"message was read"];
+    OutgointTableViewCell *cell;
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+
+    NSInteger sectionsAmount = [self.tableView numberOfSections];
+    NSInteger rowsAmount = [self.tableView numberOfRowsInSection:[indexPath section]];
+    if ([indexPath section] == sectionsAmount - 1 && [indexPath row] == rowsAmount - 1) {
+
+        [cell.statusIcon.layer addAnimation:[self imageAnimation] forKey:@"imageAnimation"];
+        cell.statusIcon.image = [UIImage imageNamed:@"readStatus"];
+
+    }
+}
+
+- (void)chatDidDeliverMessageWithID:(NSString *)messageID dialogID:(NSString *)dialogID toUserID:(NSUInteger)userId{
+    [SVProgressHUD showSuccessWithStatus:@"message was delivered"];
+
+    OutgointTableViewCell *cell;
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+
+    NSInteger sectionsAmount = [self.tableView numberOfSections];
+    NSInteger rowsAmount = [self.tableView numberOfRowsInSection:[indexPath section]];
+            if ([indexPath section] == sectionsAmount - 1 && [indexPath row] == rowsAmount - 1) {
+    
+                [cell.statusIcon.layer addAnimation:[self imageAnimation] forKey:@"imageAnimation"];
+                cell.statusIcon.image = [UIImage imageNamed:@"Delivered Image"];
+    
+            }
 }
 
 

@@ -189,12 +189,12 @@ else {
 
     [QBRequest logOutWithSuccessBlock:^(QBResponse *response) {
         // Successful logout
-        [SVProgressHUD showSuccessWithStatus:@"Signed Out"];
+//        [SVProgressHUD showSuccessWithStatus:@"Signed Out"];
 
         [self performSegueWithIdentifier:@"logoutSeg" sender:nil];
 
     } errorBlock:^(QBResponse *response) {
-        [SVProgressHUD showErrorWithStatus:@"Error Signing Out"];
+//        [SVProgressHUD showErrorWithStatus:@"Error Signing Out"];
     }];
 }
 

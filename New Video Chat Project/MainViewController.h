@@ -30,6 +30,7 @@
 @property QBChatDialog *userDialogToBePassed;
 @property NSString *navBarTitle;
 @property UIImage *imageToDialogVC;
+@property UIImage *currentUserImageToBePassed;
 
 
 @end

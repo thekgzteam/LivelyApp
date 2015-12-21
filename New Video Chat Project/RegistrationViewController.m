@@ -138,7 +138,7 @@
 - (IBAction)requestCode:(id)sender {
 
     {
-        [SVProgressHUD showWithStatus:@"Requesting"];
+        [SVProgressHUD showWithStatus:@"Please Wait"];
 
         NSNumber *number = @([self.phoneNumber.text doubleValue]);
 
