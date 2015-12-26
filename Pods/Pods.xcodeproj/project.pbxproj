@@ -271,6 +271,7 @@
 		F9A49E306CE246D7F327C43091688131 /* FBSDKLoginCompletion.h in Headers */ = {isa = PBXBuildFile; fileRef = 5EC78E864E3ED826A96D888902DC8456 /* FBSDKLoginCompletion.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		FA27E23894DFC2F77A0EA14C2D1A3DD4 /* FBSDKMonotonicTime.m in Sources */ = {isa = PBXBuildFile; fileRef = B610EAAE48447CB7F6C6D90F50D96809 /* FBSDKMonotonicTime.m */; };
 		FB9237E38009CB01D2D2BC136D5924B7 /* BFCancellationTokenSource.h in Headers */ = {isa = PBXBuildFile; fileRef = E30D69C54BAE22DA7C5AFE0FD765ED40 /* BFCancellationTokenSource.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		FD1C5C221C2CFB8B003C3B36 /* CreateMessageTableViewCell.h in Headers */ = {isa = PBXBuildFile; fileRef = FD1C5C201C2CFB8B003C3B36 /* CreateMessageTableViewCell.h */; };
 		FDF39F9BC888D9146BC087518C89A8F6 /* FBSDKTypeUtility.h in Headers */ = {isa = PBXBuildFile; fileRef = EF40B6CD21BF006D43BEA2117B5ABEA4 /* FBSDKTypeUtility.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		FEAB4AF7F2C57BDEFD6081038CFD20FB /* FBSDKLogger.h in Headers */ = {isa = PBXBuildFile; fileRef = A02399914215D4D964BC1DD7B2326E70 /* FBSDKLogger.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		FF6C07931C151FAE59F3FB55F032AF23 /* FBSDKAppEventsState.m in Sources */ = {isa = PBXBuildFile; fileRef = 151D45A68B39EC95467108C0BBF46470 /* FBSDKAppEventsState.m */; };
@@ -616,6 +617,7 @@
 		FC2C583E7C2C5F79C4F07AF6ABE75246 /* FBSDKLoginManagerLogger.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FBSDKLoginManagerLogger.m; path = FBSDKLoginKit/FBSDKLoginKit/Internal/FBSDKLoginManagerLogger.m; sourceTree = "<group>"; };
 		FC45C1F598D73947AF9E09D3E35FC93C /* SVProgressHUD.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SVProgressHUD.h; path = SVProgressHUD/SVProgressHUD.h; sourceTree = "<group>"; };
 		FCF3DBE1478E86256B542159538745A7 /* BFAppLink_Internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = BFAppLink_Internal.h; path = Bolts/iOS/BFAppLink_Internal.h; sourceTree = "<group>"; };
+		FD1C5C201C2CFB8B003C3B36 /* CreateMessageTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateMessageTableViewCell.h; sourceTree = "<group>"; };
 		FD7EE7D1CAE9ABA3A72B5E0E7D495E5D /* UIImage+GIF.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIImage+GIF.m"; path = "SDWebImage/UIImage+GIF.m"; sourceTree = "<group>"; };
 		FED5C79035598450C9F4732B5A32A1B4 /* BFURL.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = BFURL.m; path = Bolts/iOS/BFURL.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -861,6 +863,7 @@
 		7DB346D0F39D3F0E887471402A8071AB = {
 			isa = PBXGroup;
 			children = (
+				FD1C5C201C2CFB8B003C3B36 /* CreateMessageTableViewCell.h */,
 				BA6428E9F66FD5A23C0A2E06ED26CD2F /* Podfile */,
 				122DA2E5084A4393C29BE363C764795C /* Frameworks */,
 				CA353DA708635F4791ED5C9B4983B48E /* Pods */,
@@ -1360,6 +1363,7 @@
 				7171DEAFC5A2F780E670B8395EF8F07B /* BFDefines.h in Headers */,
 				012374FC7BF3C42864F8A6D9790C7836 /* BFExecutor.h in Headers */,
 				80511BB81FC091E526BECA78607C0FC2 /* BFMeasurementEvent.h in Headers */,
+				FD1C5C221C2CFB8B003C3B36 /* CreateMessageTableViewCell.h in Headers */,
 				12D4BF5F8785937DA809F9D90E6FB565 /* BFMeasurementEvent_Internal.h in Headers */,
 				EC5F8395D48ED1C0BE2C2D7EB7D9F4B9 /* BFTask.h in Headers */,
 				6D2E47E46AED98D49CD7E1D7DCA449B3 /* BFTaskCompletionSource.h in Headers */,

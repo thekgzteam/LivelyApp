@@ -27,7 +27,6 @@
 #import "DialogViewController.h"
 #import "CreatGroupVC.h"
 #import "ContactsAndGroups.h"
-#import "IncomingViewController.h"
 
 @interface MainViewController () <UITableViewDataSource, UITableViewDelegate, UIGestureRecognizerDelegate, NMPaginatorDelegate, QBChatDelegate, QBRTCClientDelegate,UISearchControllerDelegate, UISearchResultsUpdating, UISearchBarDelegate>
 
@@ -41,6 +40,7 @@
 @property NSArray *filteredResults;
 @property (weak, nonatomic) IBOutlet UILabel *allTextsButtonAndNumberOfDialogs;
 @property (weak, nonatomic) IBOutlet UIButton *createGroupChatButton;
+@property (weak, nonatomic) IBOutlet UIView *dummyVIew;
 
 @end
 
@@ -48,16 +48,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-    self.tableView.tableHeaderView.hidden = YES;
-
-//    UIView *buttonView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 88)];
-//    self.createGroupChatButton = [[UIButton alloc]initWithFrame:CGRectMake(0, 0, 320, 88)];
-//
-//    [buttonView addSubview:self.createGroupChatButton];
-//    self.tableView.tableHeaderView = buttonView;
-    self.automaticallyAdjustsScrollViewInsets = NO;
-    self.tableView.contentInset = UIEdgeInsetsMake(-44, 0, 0, 0);
 
     self.createGroupChatButton.layer.borderColor = [[UIColor whiteColor] CGColor];
     self.createGroupChatButton.layer.borderWidth = 1.5f;
@@ -96,54 +86,32 @@
 
 
 
-    self.writeNewMessage.layer.cornerRadius = 30;
-    self.writeNewMessage.layer.masksToBounds = YES;
-    self.writeNewMessage.layer.borderColor=[[UIColor redColor] CGColor];
-    [self.writeNewMessage.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
+    SWRevealViewController *revealController = [self revealViewController];
+    if (revealController == nil) {
+    UITapGestureRecognizer *tap = [revealController tapGestureRecognizer];
+    tap.delegate = self;
+    [self.view addGestureRecognizer:tap];
+    }
 
 #pragma mark - SIDE BAR CONTACTS AND GROUPS
     SWRevealViewController *revealViewController = self.revealViewController;
     if ( revealViewController ) {
         [self.view addGestureRecognizer:self.revealViewController.panGestureRecognizer];
+        [self.view addGestureRecognizer:self.revealViewController.tapGestureRecognizer];
     }
 
-#pragma mark - QBCHAT DIALOG METHODS -
-
-    // FETCHING CURRENT USER IMAGE FOR DIALOG CHATHEAD
-    QBUUser *currentuser = [QBSession currentSession].currentUser;
-    NSUInteger userProfilePictureID = currentuser.blobID; // user - an instance of QBUUser class
-
-    [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse *  response, NSData *fileData) {
-
-        self.currentUserImageToBePassed = [UIImage imageWithData:fileData];
-
-    } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
-        nil;
-    } errorBlock:^(QBResponse * _Nonnull response) {
-    }];
-
-
-    // REQUEST FOR COUNT OF DIALOGS
-    [QBRequest countOfDialogsWithExtendedRequest:nil successBlock:^(QBResponse *response, NSUInteger count) {
-        NSString *integerAsString = [@(count) stringValue];
-        NSString *numberOfDialogs = [NSString stringWithFormat:@"Messages (%@)", integerAsString];
-        self.allTextsButtonAndNumberOfDialogs.text = numberOfDialogs;
-            } errorBlock:^(QBResponse *response) {
-    }];
-        [self loadDialogs];
 }
 
 
-- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
-    self.tableView.tableHeaderView.hidden = NO;
-    self.tableView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
-}
 
 
 - (void)viewDidAppear:(BOOL)animated {
         [super viewDidAppear:animated];
 
-    NSLog(@"----------%ld------", [QBSession currentSession].currentUser.ID);
+    [self loadDialogs];
+
+    self.createGroupChatButton.layer.borderColor = [[UIColor grayColor] CGColor];
+    self.createGroupChatButton.layer.borderWidth = 0.7f;
 
 
 #pragma mark - CONNECTING TO CHAT AND WEBRTCVIDEO
@@ -162,7 +130,6 @@
     __weak typeof(self)weakSelf = self;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-//        [SVProgressHUD showWithStatus:@"Loading history"];
         [weakSelf.paginator fetchFirstPage];
     });
 }
@@ -182,9 +149,7 @@
         wSelf.textMessages = dialogObjects;
         wSelf.userPhotos = [NSMutableArray arrayWithCapacity:dialogObjects.count];
 
-        for (id o in dialogObjects) {
-            [wSelf.userPhotos addObject:[NSNull null]];
-        }
+
         dispatch_async(dispatch_get_main_queue(), ^{
             [wSelf.tableView reloadData];
         });
@@ -232,8 +197,9 @@
 }
 
 - (MainTableViewCell *)tableView: (UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *CellIdentifier = @"maincellid";
 
-    MainTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"maincellid"];
+    MainTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
 
     CGFloat r = (float)rand()/RAND_MAX;
     CGFloat g = (float)rand()/RAND_MAX;
@@ -248,7 +214,6 @@
     }
 
     QBChatDialog *allDialogs = [self.textMessages objectAtIndex:indexPath.row];
-    UIImage *photo = [self.userPhotos objectAtIndex:indexPath.row];
 
 
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
@@ -256,7 +221,8 @@
     formatter.doesRelativeDateFormatting = YES;
 
     NSDateFormatter *formatter2 = [[NSDateFormatter alloc] init];
-    [formatter2 setDateFormat:@"HH:mm"];
+    [formatter setTimeStyle:NSDateFormatterFullStyle];
+    [formatter setDateFormat:@"HH:mm a"];
     NSString *startTimeString = [formatter2 stringFromDate:allDialogs.lastMessageDate];
     NSString *dialogCreatedDate = [formatter2 stringFromDate:allDialogs.createdAt];
 
@@ -265,39 +231,52 @@
        switch (allDialogs.type) {
         case QBChatDialogTypeGroup: {
 
-//            if (![photo isEqual:[NSNull null]]) {
-//                cell.profileImage.image = photo;
-//            } else {
-                NSUInteger indexID = [allDialogs.photo integerValue];
-                __weak MainViewController *wSelf = self;
-                [QBRequest downloadFileWithID:indexID successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
 
-                    if (fileData == nil) {
-                        cell.profileImage.image = [UIImage imageNamed:@"group icon-1"];
-                    } else {
-                        cell.profileImage.image = [UIImage imageWithData:fileData];
-                    }
-//                    UIImage *userImage = [UIImage imageWithData:fileData];
-//
-//                    if (userImage == nil) {
-//                         [wSelf.userPhotos insertObject:[UIImage imageNamed:@"group icon-1"] atIndex:indexPath.row];
-//    
-//                    } else {
-//
-//                        [wSelf.userPhotos insertObject:userImage atIndex:indexPath.row];
-//                    }
-//
-//                    cell.profileImage.image = [wSelf.userPhotos objectAtIndex:indexPath.row];
+            /// Multiple Chat Heads
 
-                } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
-                    nil;
-                } errorBlock:nil];
+//            NSArray *users =  allDialogs.occupantIDs;
+//            NSMutableArray *users2 = [NSMutableArray arrayWithArray:users];
+//            NSInteger currentUserID = [QBSession currentSession].currentUser.ID;
+//            int count = 0;
+//            NSNumber *currentUserIndex = nil;
+//            for (NSNumber *opponentID in users2) {
+//                if ([opponentID integerValue] == currentUserID) {
+//                    currentUserIndex = @(count);
+//                    break;
+//                }
+//                count++;
 //            }
-        };
-//               cell.profileImage.image = [UIImage imageNamed:@"group icon-1"];
+//            if (currentUserIndex) [users2  removeObjectAtIndex:[currentUserIndex intValue]];
+//            NSLog(@"------%@------",users2);
+//
+//            QBUUser *user1 = [QBUUser user];
+//            NSString *firstUser =  [users2 objectAtIndex:0];
+//            NSUInteger userFirst = [firstUser integerValue];
+//            user1.ID = userFirst;
+//
+//
+//
+//            QBUUser *user2 = [QBUUser user];
+//            NSString *secondUser =  [users2 objectAtIndex:0];
+//            NSUInteger userSec = [secondUser integerValue];
+//            user2.ID = userSec;
+//
+//            QBUUser *user3 = [QBUUser user];
+//            NSString *thirdUser =  [users2 objectAtIndex:0];
+//            NSUInteger userThird = [thirdUser integerValue];
+//            user3.ID = userThird;
+//
 
 
+            NSUInteger userProfilePictureID = [allDialogs.photo integerValue];
+            NSString *privateUrl = [QBCBlob privateUrlForID:userProfilePictureID];
 
+            [cell.profileImage sd_setImageWithURL:[NSURL URLWithString:privateUrl]
+                                 placeholderImage:[UIImage imageNamed:@"group icon-1"]
+                                        completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+                                        }];
+
+        }
                if (self.searchControllers.active) {
                    QBChatDialog *allDialogs = [self.filteredResults objectAtIndex:indexPath.row];
                    cell.profileName.text = allDialogs.name;
@@ -348,44 +327,25 @@
                 cell.timeOfMessage.text = result;
             }
 
-            if (![photo isEqual:[NSNull null]]) {
-                cell.profileImage.image = photo;
-            } else {
-
             NSArray *userids = [[NSArray alloc]initWithObjects:@(allDialogs.recipientID), nil];
             [QBRequest usersWithIDs:userids page:[QBGeneralResponsePage responsePageWithCurrentPage:1 perPage:10] successBlock:^(QBResponse *response, QBGeneralResponsePage *page, NSArray *users) {
                 for (QBUUser *user in users) {
                     NSUInteger userProfilePictureID = user.blobID;
-
-                    __weak MainViewController *wSelf = self;
-                    [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
-                        UIImage *userImage = [UIImage imageWithData:fileData];
-
-                        if (userImage == nil) {
-                            [wSelf.userPhotos insertObject:[UIImage imageNamed:@"Profile Picture"] atIndex:indexPath.row];
-
-                        } else {
-
-                            [wSelf.userPhotos insertObject:userImage atIndex:indexPath.row];
-                        }
-                        
-                        cell.profileImage.image = [wSelf.userPhotos objectAtIndex:indexPath.row];
-
-//                        cell.profileImage.image = [UIImage imageWithData:fileData];
+                    NSString *privateUrl = [QBCBlob privateUrlForID:userProfilePictureID];
 
 
 
-                    } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
-                        nil;
-                    } errorBlock:^(QBResponse * _Nonnull response) {
-                    }];
+        [cell.profileImage sd_setImageWithURL:[NSURL URLWithString:privateUrl]
+                          placeholderImage:[UIImage imageNamed:@"Profile Picture"]
+                                 completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+                                 }];
+
                 }
 
             } errorBlock:^(QBResponse *response) {
                 // Handle error here
             }];
         }  break;
-    }
         case QBChatDialogTypePublicGroup: {
             cell.profileName.text = allDialogs.name;
             cell.textMessage.text = allDialogs.lastMessageText;
@@ -433,9 +393,12 @@
 
 }
 
+
 #pragma mark - USER INTERACTION -
 
 - (IBAction)createGroupChat:(id)sender {
+
+  
     CreatGroupVC *modalVC = [self.storyboard instantiateViewControllerWithIdentifier:@"createGroupVC"];
     modalVC.transitioningDelegate = self;
     modalVC.modalPresentationStyle = UIModalPresentationCustom;
@@ -444,7 +407,7 @@
 
 - (IBAction)startNewChatButton:(id)sender {
     ContactsAndGroups *contactsVC =
-    [self.storyboard instantiateViewControllerWithIdentifier:@"ContactListVC"];
+    [self.storyboard instantiateViewControllerWithIdentifier:@"CreateNewMessageVC"];
     contactsVC.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
     [self presentViewController:contactsVC animated:YES completion:nil];
 }
@@ -530,7 +493,6 @@
         dvc.session = self.currentSession;
         dvc.imageForRightBar = self.imageToDialogVC;
         dvc.session = self.sessionToAccept;
-        dvc.currentUserImage = self.currentUserImageToBePassed;
         [segue.destinationViewController hidesBottomBarWhenPushed];
         dvc.navigationController.navigationBarHidden = YES;
     }

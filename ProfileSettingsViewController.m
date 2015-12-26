@@ -9,13 +9,13 @@
 #import "ProfileSettingsViewController.h"
 #import <Quickblox/Quickblox.h>
 #import "SVProgressHUD.h"
-
+#import <UIImageView+WebCache.h>
 
 
 @interface ProfileSettingsViewController () <UIImagePickerControllerDelegate, UINavigationControllerDelegate,UIActionSheetDelegate, UIGestureRecognizerDelegate>
+@property (weak, nonatomic) IBOutlet UIButton *editProfileButton;
 
 @property (weak, nonatomic) IBOutlet UIImageView *profileImage;
-@property (weak, nonatomic) IBOutlet UIButton *editProfileButton;
 @property (weak, nonatomic) IBOutlet UILabel *profileNameLabel;
 @property (weak, nonatomic) IBOutlet UILabel *profileStatus;
 @property (weak, nonatomic) IBOutlet UIButton *dismissPSetVC;
@@ -26,6 +26,8 @@
 @property UIImage *image;
 @property UIImagePickerController *pickerController;
 @property UIActionSheet *actionSheet;
+@property UIActionSheet *actionSheet2;
+
 
 
 @end
@@ -35,45 +37,57 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
+    [self.profileImage setUserInteractionEnabled:YES];
+    [self.profileNameLabel setUserInteractionEnabled:YES];
+    [self.profileStatus setUserInteractionEnabled:YES];
+
     UITapGestureRecognizer *singleTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGesture:)];
+    UITapGestureRecognizer *singleTapGestureRecognizerName = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGestureName:)];
+    UITapGestureRecognizer *singleTapGestureRecognizerStatus = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGestureStatus:)];
+
+
     [self.profileImage addGestureRecognizer:singleTapGestureRecognizer];
+    [self.profileNameLabel addGestureRecognizer:singleTapGestureRecognizerName];
+    [self.profileStatus addGestureRecognizer:singleTapGestureRecognizerStatus];
+
     singleTapGestureRecognizer.numberOfTapsRequired = 1;
+    singleTapGestureRecognizerName.numberOfTapsRequired = 1;
+    singleTapGestureRecognizerStatus.numberOfTapsRequired = 1;
     singleTapGestureRecognizer.delegate = self;
+    singleTapGestureRecognizerStatus.delegate = self;
+    singleTapGestureRecognizerName.delegate = self;
 
     // UI DESIGN
     self.saveChangesButton.hidden = YES;
     self.activityIndicator.hidden = NO;
     [self.activityIndicator startAnimating];
     self.view.layer.cornerRadius = 8.f;
-    self.dismissPSetVC.layer.cornerRadius = 20.0f;
+    self.dismissPSetVC.layer.cornerRadius = 23.0f;
+    self.saveChangesButton.layer.cornerRadius = 30.f;
+    self.saveChangesButton.layer.masksToBounds = YES;
+    self.saveChangesButton.layer.borderColor = [[UIColor whiteColor]CGColor];
+    self.saveChangesButton.layer.borderWidth = 2.0f;
+
     self.editProfileButton.layer.cornerRadius = 30.f;
     self.editProfileButton.layer.masksToBounds = YES;
     self.editProfileButton.layer.borderColor = [[UIColor whiteColor]CGColor];
     self.editProfileButton.layer.borderWidth = 2.0f;
 
-    self.saveChangesButton.layer.cornerRadius = 20.f;
-    self.saveChangesButton.layer.masksToBounds = YES;
-    self.saveChangesButton.layer.borderColor = [[UIColor whiteColor]CGColor];
-    self.saveChangesButton.layer.borderWidth = 1.0f;
 
-    self.profileImage.layer.cornerRadius = 75.f;
+    self.profileImage.layer.cornerRadius = 63.f;
     self.profileImage.layer.masksToBounds = YES;
     self.profileImage.layer.borderColor = [UIColor colorWithRed:22.0 green:160.0 blue:133.0 alpha:1.0f].CGColor;
     self.profileImage.layer.borderWidth = 4.0f;
 
 //  FETCHING CURRENT USER AVATAR
-    QBUUser *currentuser = [QBSession currentSession].currentUser;
-    NSUInteger userProfilePictureID = currentuser.blobID;
+    NSUInteger userProfilePictureID = [QBSession currentSession].currentUser.blobID;
 
-    [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
-        self.profileImage.image = [UIImage imageWithData:fileData];
-        self.activityIndicator.hidden = YES;
-        [self.activityIndicator stopAnimating];
+    NSString *privateUrl = [QBCBlob privateUrlForID:userProfilePictureID];
 
-    } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
-        nil;
-    } errorBlock:^(QBResponse * _Nonnull response) {
-    }];
+    [self.profileImage sd_setImageWithURL:[NSURL URLWithString:privateUrl]
+                       placeholderImage:[UIImage imageNamed:@"Profile Picture"]
+                              completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+                              }];
 
 //  FETCHING CURRENT USER NAME AND STATUS
     [QBRequest userWithID:[QBSession currentSession].currentUser.ID successBlock:^(QBResponse *response, QBUUser *user) {
@@ -93,10 +107,12 @@
     [self.profileNameLabel.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
     [self.profileStatus.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
     [self.profileStatus.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
-    [self.editProfileButton.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
-    [self.editProfileButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
     [self.saveChangesButton.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
     [self.saveChangesButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
+
+    [self.editProfileButton.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
+    [self.editProfileButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
+
     [self.dismissPSetVC.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
     [self.dismissPSetVC.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
 
@@ -112,6 +128,33 @@
     self.saveChangesButton.hidden = NO;
 }
 
+
+-(void)tapGestureName:(UITapGestureRecognizer *)tapGestureRecognizerForName {
+    [self showAlertController];
+}
+
+-(void)tapGestureStatus:(UITapGestureRecognizer *)tapGestureRecognizerForStatus {
+    [self showAlertControllerForStatus];
+}
+
+- (IBAction)editProfileButtonPressed:(id)sender {
+
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
+
+        self.actionSheet2 = [[UIActionSheet alloc] initWithTitle:nil
+                                                       delegate:self
+                                              cancelButtonTitle:@"Cancel"
+                                         destructiveButtonTitle:nil
+                                              otherButtonTitles:@"Take Photo", @"Choose From Library", @"Change Name", @"Change Status", nil];
+        [self.actionSheet2 showInView:self.view];
+    } else {
+        [self choosePhotoFromLibrary];
+    }
+
+
+
+}
+
 -(void)tapGesture:(UITapGestureRecognizer *)tapGestureRecognizer2 {
 
     if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
@@ -120,11 +163,12 @@
                                                        delegate:self
                                               cancelButtonTitle:@"Cancel"
                                          destructiveButtonTitle:nil
-                                              otherButtonTitles:@"Take Photo", @"Choose From Library", @"Edit Name", @"Edit Status", nil];
+                                              otherButtonTitles:@"Take Photo", @"Choose From Library", nil];
         [self.actionSheet showInView:self.view];
     } else {
         [self choosePhotoFromLibrary];
     }
+    self.actionSheet.tag = 1;
 
 }
 
@@ -140,9 +184,11 @@
 }
 
 - (IBAction)onSaveChangesButtonPressed:(id)sender {
+
     [self saveImage];
     [self updateFullName];
     [self updateStatus];
+    self.saveChangesButton.hidden = YES;
 }
 
 #pragma mark - ImagePicker Controller
@@ -203,6 +249,8 @@
         wSelf.fullNameHolder = nameTextField.text;
         wSelf.profileNameLabel.text = nameTextField.text;
         [self saveButtonEnabled];
+        self.editProfileButton.hidden = YES;
+
             }];
 
     UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
@@ -221,6 +269,8 @@
         UITextField *status = [[alert textFields]firstObject];
         wSelf.statusHolder = status.text;
         wSelf.profileStatus.text = status.text;
+        self.editProfileButton.hidden = YES;
+
         [self saveButtonEnabled];
     }];
 
@@ -236,7 +286,6 @@
     params.website = self.profileStatus.text;
 
     [QBRequest updateCurrentUser:params successBlock:^(QBResponse * _Nonnull response, QBUUser * _Nullable user) {
-        self.saveChangesButton.hidden = NO;
     } errorBlock:^(QBResponse * _Nonnull response) {
     }];
 }
@@ -248,7 +297,6 @@
 
     [QBRequest updateCurrentUser:params successBlock:^(QBResponse * _Nonnull response, QBUUser * _Nullable user) {
 
-        self.saveChangesButton.hidden = NO;
     } errorBlock:^(QBResponse * _Nonnull response) {
     }];
 }
@@ -261,11 +309,12 @@
                                                        delegate:self
                                               cancelButtonTitle:@"Cancel"
                                          destructiveButtonTitle:nil
-                                              otherButtonTitles:@"Take Photo", @"Choose From Library", @"Edit Name", @"Edit Status", nil];
+                                              otherButtonTitles:@"Take Photo", @"Choose From Library", nil];
         [self.actionSheet showInView:self.view];
     } else {
         [self choosePhotoFromLibrary];
     }
+    self.actionSheet2.tag = 2;
 }
 
 #pragma mark - Image
@@ -280,6 +329,7 @@
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
 
     [self saveButtonEnabled];
+    self.editProfileButton.hidden = YES;
     self.image = info[UIImagePickerControllerEditedImage];
     [self showImage:self.image];
 
@@ -295,18 +345,34 @@
 
 - (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
 
-    if (buttonIndex == 0) {
-        [self takePhoto];
+    if (actionSheet.tag == 1) {
+        
+        if (buttonIndex == 0) {
+            [self takePhoto];
 
-    } else if (buttonIndex == 1) {
-        [self choosePhotoFromLibrary];
-    }else if (buttonIndex == 2) {
-        [self showAlertController];
-    }else if (buttonIndex == 3) {
-        [self showAlertControllerForStatus];
+        } else if (buttonIndex == 1) {
+            [self choosePhotoFromLibrary];
+        }else
+            self.actionSheet = nil;
+    } else {
+        if (buttonIndex == 0) {
+            [self takePhoto];
+
+        } else if (buttonIndex == 1) {
+            [self choosePhotoFromLibrary];
+
+        }else if (buttonIndex == 2) {
+            [self showAlertController];
+
+        }else if (buttonIndex == 3) {
+            [self showAlertControllerForStatus];
+        }
+        self.actionSheet2 = nil;
     }
-    self.actionSheet = nil;
+
+
 }
+
 
 - (CABasicAnimation*)ovalAnimation{
     CABasicAnimation * transformAnim = [CABasicAnimation animationWithKeyPath:@"transform"];

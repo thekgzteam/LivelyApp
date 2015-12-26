@@ -12,5 +12,8 @@
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 
 -(void)tapGesture:(UITapGestureRecognizer *)tapGestureRecognizer2;
+-(void)tapGestureName:(UITapGestureRecognizer *)tapGestureRecognizerForName;
+
+-(void)tapGestureStatus:(UITapGestureRecognizer *)tapGestureRecognizerForStatus;
 
 @end

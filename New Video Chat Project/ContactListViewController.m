@@ -27,6 +27,7 @@
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *cancelButton;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *createButton;
+@property NSData *imageData;
 
 
 
@@ -125,26 +126,40 @@
     [QBRequest createDialog:chatDialog successBlock:^(QBResponse *response, QBChatDialog *createdDialog) {
 
         [SVProgressHUD showSuccessWithStatus:@"Dialog Created"];
-        NSData * imageData = UIImageJPEGRepresentation (self.dialogAvatar, 0.15);
 
-        [QBRequest TUploadFile:imageData fileName:@"Dialog Avatar" contentType:@"image/png" isPublic:NO successBlock:^(QBResponse *response, QBCBlob *uploadedBlob) {
-            NSLog(@"-----------Image Uploaded &&& Now Setting The Blob ----------");
-            NSUInteger uploadedFileID = uploadedBlob.ID;
-            createdDialog.photo = [NSString stringWithFormat:@"%ld", uploadedFileID];
-            [QBRequest updateDialog:createdDialog successBlock:^(QBResponse * _Nonnull response, QBChatDialog * _Nullable chatDialog) {
-                [SVProgressHUD showSuccessWithStatus:@"Dialog Updated"];
-                [self performSegueWithIdentifier:@"groupDialogCreatedSeg" sender:self];
 
-            } errorBlock:^(QBResponse * _Nonnull response) {
-                [SVProgressHUD showErrorWithStatus:@"Error Updating the dialog"];
+
+        if (self.dialogAvatar != nil) {
+
+            self.imageData = UIImageJPEGRepresentation (self.dialogAvatar, 0.15);
+            [QBRequest TUploadFile:self.imageData fileName:@"Dialog Avatar" contentType:@"image/png" isPublic:NO successBlock:^(QBResponse *response, QBCBlob *uploadedBlob) {
+                NSLog(@"-----------Image Uploaded &&& Now Setting The Blob ----------");
+                NSUInteger uploadedFileID = uploadedBlob.ID;
+                createdDialog.photo = [NSString stringWithFormat:@"%ld", uploadedFileID];
+
+                [QBRequest updateDialog:createdDialog successBlock:^(QBResponse * _Nonnull response, QBChatDialog * _Nullable chatDialog) {
+                    [SVProgressHUD showSuccessWithStatus:@"Dialog Updated"];
+                    [self performSegueWithIdentifier:@"groupDialogCreatedSeg" sender:self];
+
+                } errorBlock:^(QBResponse * _Nonnull response) {
+                    [SVProgressHUD showErrorWithStatus:@"Error Updating the dialog"];
+                }];
+            } statusBlock:^(QBRequest *request, QBRequestStatus *status) {
+            } errorBlock:^(QBResponse *response) {
+                NSLog(@"----------error: %@------", response.error);
             }];
-            
-        } statusBlock:^(QBRequest *request, QBRequestStatus *status) {
-            NSLog(@"-----------Dialog Avatar is now Set ----------");
-        } errorBlock:^(QBResponse *response) {
-            NSLog(@"----------error: %@------", response.error);
-        }];
 
+
+        } else {
+
+                [QBRequest updateDialog:createdDialog successBlock:^(QBResponse * _Nonnull response, QBChatDialog * _Nullable chatDialog) {
+                    [SVProgressHUD showSuccessWithStatus:@"Dialog Updated"];
+                    [self performSegueWithIdentifier:@"groupDialogCreatedSeg" sender:self];
+
+                } errorBlock:^(QBResponse * _Nonnull response) {
+                    [SVProgressHUD showErrorWithStatus:@"Error Updating the dialog"];
+                }];
+        }
             } errorBlock:^(QBResponse *response) {
             NSLog(@"error: %@", response.error);
         }];

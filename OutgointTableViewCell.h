@@ -18,6 +18,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *arrowLabel;
 @property (weak, nonatomic) IBOutlet UITextView *outgoingLabel;
 @property (weak, nonatomic) IBOutlet UILabel *timeLabel;
+@property (weak, nonatomic) IBOutlet UIView *arrowView;
 
 
 

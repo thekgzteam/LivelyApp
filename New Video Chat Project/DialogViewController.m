@@ -37,6 +37,8 @@
 #import "OpponentsFlowLayout.h"
 NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionViewCellIdentifier";
 
+
+
 @class QBRTCRemoteVideoView;
 @class QBRTCVideoRenderer;
 @class QBRTCSampleBufferView;
@@ -45,7 +47,9 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 @class QBRTCStatsReport;
 @class QBChat;
 
+
 @interface DialogViewController ()  <UINavigationControllerDelegate, UIImagePickerControllerDelegate, QBChatDelegate, QBRTCClientDelegate, UIActionSheetDelegate, UIViewControllerTransitioningDelegate, UIPopoverPresentationControllerDelegate, UIGestureRecognizerDelegate,UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchControllerDelegate, UISearchResultsUpdating, UISearchBarDelegate>
+
 
     // TableView and Cells
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
@@ -92,23 +96,85 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 @property (nonatomic, strong) CAShapeLayer *oval;
 @property (nonatomic, strong) CAShapeLayer *oval2;
 @property (nonatomic, strong) CAShapeLayer *oval3;
+@property BOOL speakersAreOn;
+
+@property UIButton *mainButton;
+@property UIButton *menuButtonOne;
+@property UIButton *menuButtonTwo;
+@property UIButton *menuButtonThree;
+@property UIDynamicAnimator *dynamicAnimator;
+@property BOOL areButtonsFanned;
 
 @end
 
+
+
 @implementation DialogViewController
 
-@synthesize pickerController = _pickerController;
+
+@synthesize pickerController = _pickerController, delegate = _delegate;
+
 
 
 - (void)dealloc {
     self.renderer = nil;
 }
 
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+
+    self.userDialogs.unreadMessagesCount = 0;
+
+}
+
 - (void)viewDidLoad {
+
     [super viewDidLoad];
 
+
+    self.areButtonsFanned = NO;
+    self.menuButtonOne.hidden = YES;
+    self.menuButtonTwo.hidden = YES;
+    self.menuButtonThree.hidden = YES;
+
+    self.view.backgroundColor = [UIColor blackColor];
+    self.dynamicAnimator = [[UIDynamicAnimator alloc]initWithReferenceView:self.view];
+    self.menuButtonOne = [self createButtonWithTitle:@""];
+    self.menuButtonTwo = [self createButtonWithTitle:@""];
+    self.menuButtonThree = [self createButtonWithTitle:@""];
+    self.mainButton = [self createButtonWithTitle:@""];
+    [self.mainButton setBackgroundImage:[UIImage imageNamed:@"chatSettingsIcon"] forState:UIControlStateNormal];
+    self.mainButton.backgroundColor = [UIColor colorWithRed:255 green:255 blue:255 alpha:0.1];
+
+    [self.menuButtonOne setImage:[UIImage imageNamed:@"dynamicOff"] forState:UIControlStateNormal];
+    [self.menuButtonTwo setImage:[UIImage imageNamed:@"micOff"] forState:UIControlStateNormal];
+    [self.menuButtonThree setImage:[UIImage imageNamed:@"videoOn"] forState:UIControlStateNormal];
+
+    self.menuButtonOne.hidden = YES;
+    self.menuButtonTwo.hidden = YES;
+    self.menuButtonThree.hidden = YES;
+
+    [self.menuButtonOne setBackgroundColor:[UIColor colorWithRed:255/255.0f green:255/255.0f blue:255/255.0f alpha:0.1]];
+    [self.menuButtonTwo setBackgroundColor:[UIColor colorWithRed:255/255.0f green:255/255.0f blue:255/255.0f alpha:0.1]];
+    [self.menuButtonThree setBackgroundColor:[UIColor colorWithRed:255/255.0f green:255/255.0f blue:255/255.0f alpha:0.1]];
+
+
+    [self.mainButton addTarget:self action:@selector(fanButtons:) forControlEvents:UIControlEventTouchUpInside];
+    [self.menuButtonThree addTarget:self action:@selector(videoButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.menuButtonOne addTarget:self action:@selector(speakerButton:) forControlEvents:UIControlEventTouchUpInside];
+    [self.menuButtonTwo addTarget:self action:@selector(micButton:) forControlEvents:UIControlEventTouchUpInside];
+
+    [[AVAudioSession sharedInstance] setDelegate:self];
+
+
+    [self.delegate secondViewScreenControllerDidPressCancelButton:self sender:nil];
     
-//    [self.tableView setContentOffset:CGPointMake(0, 88) animated:YES];
+    self.navTitleButton.layer.shadowColor = [UIColor whiteColor].CGColor;
+    self.navTitleButton.layer.shadowOpacity = 0.5;
+    self.navTitleButton.layer.shadowRadius = 5;
+    self.navTitleButton.layer.shadowOffset = CGSizeMake(5.0f,5.0f);
+
+
     self.typingView.backgroundColor = [UIColor clearColor];
     self.typingView.hidden = YES;
 
@@ -174,8 +240,14 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     [self.videoCapture startSession];
     [self.myScreen.layer insertSublayer:self.videoCapture.previewLayer atIndex:0];
 
+    UITapGestureRecognizer *tapRecognizer2 = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(visualEffectTapped2:)];
+    tapRecognizer2.numberOfTapsRequired = 1;
+    [self.myScreen addGestureRecognizer:tapRecognizer2];
+
+
+
     self.videoCapture.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-    self.myScreen.backgroundColor = [UIColor clearColor];
+//    self.myScreen.backgroundColor = [UIColor clearColor];
     self.myScreen.layer.borderColor = [UIColor whiteColor].CGColor;
     self.myScreen.layer.borderWidth = 2.0f;
     self.myScreen.layer.cornerRadius = 5.0f;
@@ -209,7 +281,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     self.remoteVideoViewOne.layer.borderColor = [[UIColor whiteColor]CGColor];
     self.remoteVideoViewOne.layer.borderWidth = 0.7;
     self.imageViewBehindBlur.image = self.imageForRightBar;
-    self.imageViewBehindBlur.backgroundColor = [UIColor clearColor];
+//    self.imageViewBehindBlur.backgroundColor = [UIColor clearColor];
 
 //  UI CUSTOM FOR TABLE VIEW TEXT VIEW
     self.messageArray = [[NSMutableArray alloc]init];
@@ -222,7 +294,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     self.navTitleButton.layer.cornerRadius = 19.0f;
     [self.navTitleButton setBackgroundColor:[UIColor clearColor]];
     self.navTitleButton.layer.borderColor = [UIColor whiteColor].CGColor;
-    self.navTitleButton.layer.borderWidth = 0.5f;
 
 
 //  GESTURE RECOGNIZER METHODS FOR ALL
@@ -285,6 +356,150 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 //        [weakSelf.tableView reloadData];
     }];
 }
+
+#pragma mark - Chat Settings Button
+
+- (void)videoButton :(id)sender {
+    if ([sender isSelected]) {
+        [sender setImage:[UIImage imageNamed:@"videoOn"] forState:UIControlStateNormal];
+        [sender setSelected:NO];
+        [self.session.localMediaStream.videoTrack setEnabled:YES];
+
+
+    } else {
+        [self.session.localMediaStream.videoTrack setEnabled:NO];
+
+        [sender setImage:[UIImage imageNamed:@"videoOff"] forState:UIControlStateSelected];
+        [sender setSelected:YES];
+    }
+}
+
+- (void)micButton :(id)sender {
+    if ([sender isSelected]) {
+
+        [sender setImage:[UIImage imageNamed:@"micOff"] forState:UIControlStateNormal];
+        [sender setSelected:NO];
+        [self.session.localMediaStream.audioTrack setEnabled:NO];
+
+    } else {
+        [self.session.localMediaStream.audioTrack setEnabled:YES];
+
+        [sender setImage:[UIImage imageNamed:@"micOn"] forState:UIControlStateSelected];
+        [sender setSelected:YES];
+    }
+}
+
+- (void)speakerButton :(id)sender {
+
+    if ([sender isSelected]) {
+         [self disableSpeakers];
+        [sender setImage:[UIImage imageNamed:@"dynamicOff"] forState:UIControlStateNormal];
+        [sender setSelected:NO];
+    } else {
+        [self enableSpeakers];
+
+        [sender setImage:[UIImage imageNamed:@"dynamicOn"] forState:UIControlStateSelected];
+        [sender setSelected:YES];
+    }
+}
+
+- (UIButton *)createButtonWithTitle:(NSString *)title {
+
+    CGRect frame = self.view.frame;
+    UIButton *button = [[UIButton alloc]initWithFrame:CGRectMake(frame.origin.x = 220, frame.origin.y = 20, 50,50)];
+    button.layer.cornerRadius = button.bounds.size.width / 2;
+    button.layer.borderColor = [[UIColor grayColor]CGColor];
+    [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [button setTitle:title forState:UIControlStateNormal];
+
+    [self.view addSubview:button];
+    return button;
+}
+
+- (void)fanIn {
+
+    UISnapBehavior *snapBehavior;
+    snapBehavior = [[UISnapBehavior alloc]initWithItem:self.menuButtonOne snapToPoint:self.mainButton.center];
+    [self.dynamicAnimator addBehavior:snapBehavior];
+
+    snapBehavior = [[UISnapBehavior alloc]initWithItem:self.menuButtonTwo snapToPoint:self.mainButton.center];
+    [self.dynamicAnimator addBehavior:snapBehavior];
+
+    snapBehavior = [[UISnapBehavior alloc]initWithItem:self.menuButtonThree snapToPoint:self.mainButton.center];
+    [self.dynamicAnimator addBehavior:snapBehavior];
+
+    [self.menuButtonOne.layer addAnimation:[self ovalAnimationIn] forKey:@"ovalAnimationIn"];
+    [self.menuButtonTwo.layer addAnimation:[self ovalAnimationIn] forKey:@"ovalAnimationIn"];
+    [self.menuButtonThree.layer addAnimation:[self ovalAnimationIn] forKey:@"ovalAnimationIn"];
+}
+
+- (void)fanOut {
+
+    self.menuButtonOne.hidden = NO;
+    self.menuButtonTwo.hidden = NO;
+    self.menuButtonThree.hidden = NO;
+
+    CGPoint point;
+    UISnapBehavior *snapBehavior;
+
+    point = CGPointMake(self.mainButton.frame.origin.x +25, self.mainButton.frame.origin.y + 78);
+    snapBehavior = [[UISnapBehavior alloc]initWithItem:self.menuButtonOne snapToPoint:point];
+    [self.dynamicAnimator addBehavior:snapBehavior];
+
+    point = CGPointMake(self.mainButton.frame.origin.x + 25, self.mainButton.frame.origin.y + 130 );
+    snapBehavior = [[UISnapBehavior alloc]initWithItem:self.menuButtonTwo snapToPoint:point];
+    [self.dynamicAnimator addBehavior:snapBehavior];
+
+    point = CGPointMake(self.mainButton.frame.origin.x + 25, self.mainButton.frame.origin.y + 182);
+    snapBehavior = [[UISnapBehavior alloc]initWithItem:self.menuButtonThree snapToPoint:point];
+    [self.dynamicAnimator addBehavior:snapBehavior];
+
+    [self.menuButtonOne.layer addAnimation:[self ovalAnimationOut] forKey:@"ovalAnimationOut"];
+    [self.menuButtonTwo.layer addAnimation:[self ovalAnimationOut] forKey:@"ovalAnimationOut"];
+    [self.menuButtonThree.layer addAnimation:[self ovalAnimationOut] forKey:@"ovalAnimationOut"];
+}
+
+-(void)fanButtons:(id)sender {
+
+    [self.dynamicAnimator removeAllBehaviors];
+
+    if (self.areButtonsFanned) {
+        [self fanIn];
+    }
+    else {
+        [self fanOut];
+    }
+    self.areButtonsFanned = !self.areButtonsFanned;
+    if ([sender isSelected]) {
+        [sender setBackgroundColor:[UIColor colorWithRed:255 green:255 blue:255 alpha:0.1]];
+        [sender setSelected:NO];
+    } else {
+        [sender setBackgroundColor:[UIColor colorWithRed:0 green:255 blue:255 alpha:0.2]];
+        [self.mainButton.layer addAnimation:[self ovalAnimationOut] forKey:@"ovalAnimationOut"];
+        [sender setSelected:YES];
+    }
+}
+
+// Animation for Chat Settings Button
+- (CABasicAnimation*)ovalAnimationIn{
+    CABasicAnimation * opacityAnim = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    opacityAnim.toValue            = @0;
+    opacityAnim.duration           = 0.5;
+    opacityAnim.fillMode = kCAFillModeForwards;
+    opacityAnim.removedOnCompletion = NO;
+    return opacityAnim;
+}
+
+- (CABasicAnimation*)ovalAnimationOut{
+    CABasicAnimation * opacityAnim = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    opacityAnim.fromValue          = @0;
+    opacityAnim.toValue            = @1;
+    opacityAnim.duration           = 0.8;
+    opacityAnim.fillMode = kCAFillModeForwards;
+    opacityAnim.removedOnCompletion = NO;
+    return opacityAnim;
+}
+
 #pragma mark - Bezier Path
 
 - (UIBezierPath*)ovalPath{
@@ -302,15 +517,36 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     return oval3Path;
 }
 
-    - (CAKeyframeAnimation*)ovalAnimation{CAKeyframeAnimation * opacityAnim = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+- (CAKeyframeAnimation*)ovalAnimation{CAKeyframeAnimation * opacityAnim = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
     opacityAnim.values                = @[@0, @1, @0, @0];
     opacityAnim.keyTimes              = @[@0, @0.164, @0.356, @1];
     opacityAnim.duration              = 1;
     opacityAnim.fillMode = kCAFillModeForwards;
     opacityAnim.removedOnCompletion = NO;
-        opacityAnim.repeatCount = 1000;
+    opacityAnim.repeatCount = 1000;
 
     return opacityAnim;
+}
+
+-(void)enableSpeakers {
+    UInt32 audioRouteOverride = kAudioSessionOverrideAudioRoute_Speaker;
+
+    AudioSessionSetProperty (
+                             kAudioSessionProperty_OverrideAudioRoute,
+                             sizeof (audioRouteOverride),
+                             &audioRouteOverride
+                             );
+}
+
+-(void)disableSpeakers {
+
+    UInt32 audioRouteOverride = kAudioSessionOverrideAudioRoute_None;
+
+    AudioSessionSetProperty (
+                             kAudioSessionProperty_OverrideAudioRoute,
+                             sizeof (audioRouteOverride),
+                             &audioRouteOverride
+                             );
 }
 
 - (CAKeyframeAnimation*)oval2Animation{
@@ -321,8 +557,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     opacityAnim.fillMode = kCAFillModeForwards;
     opacityAnim.removedOnCompletion = NO;
     opacityAnim.repeatCount = 1000;
-
-
     return opacityAnim;
 }
 
@@ -334,12 +568,8 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     opacityAnim.fillMode = kCAFillModeForwards;
     opacityAnim.removedOnCompletion = NO;
     opacityAnim.repeatCount = 1000;
-
-
     return opacityAnim;
 }
-
-
 
 - (NSString *)senderDisplayName {
     return [QBSession currentSession].currentUser.fullName;
@@ -347,6 +577,9 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:YES];
+
+
+    [self.session.localMediaStream.audioTrack setEnabled:NO];
 
     [self scrollTableViewUp];
 
@@ -366,13 +599,10 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     __weak DialogViewController *wSelf = self;
     QBResponsePage *resPage = [QBResponsePage responsePageWithLimit:20 skip:0];
 
-    [QBRequest messagesWithDialogID:self.userDialogs.ID extendedRequest:nil forPage:resPage successBlock:^(QBResponse *response, NSArray *messages, QBResponsePage *responcePage) {
+    [QBRequest messagesWithDialogID:wSelf.userDialogs.ID extendedRequest:nil forPage:resPage successBlock:^(QBResponse *response, NSArray *messages, QBResponsePage *responcePage) {
         wSelf.messageArray = messages.mutableCopy;
         wSelf.userPhotos = [NSMutableArray arrayWithCapacity:messages.count];
 
-        for (id o in messages) {
-            [wSelf.userPhotos addObject:[NSNull null]];
-        }
 
         [wSelf.tableView reloadData];
     } errorBlock:^(QBResponse *response) {
@@ -382,6 +612,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
         NSLog(@"error: %@", response.error);
     }];
 }
+
 
 #pragma mark - METHOD TO AUTOMATICALLY SCROLL TABLE VIEW DOWN WHEN IT APPEARS
 - (void)scrollTableViewUp {
@@ -644,6 +875,9 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     [self.view resignFirstResponder];
     [self resignFirstResponder];
 }
+- (void)visualEffectTapped2:(UITapGestureRecognizer *)recognizer2 {
+        [self enableSpeakers];
+       }
 
 #pragma mark -
 #pragma mark UI ANIMATION METHODS
@@ -677,7 +911,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 - (CABasicAnimation*)remoteVideoReceivedImage {
     CABasicAnimation * transformAnim = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
     transformAnim.toValue            = @(0);
-    transformAnim.duration           = 0.7;
+    transformAnim.duration           = 0.5;
     transformAnim.fillMode = kCAFillModeBoth;
     transformAnim.removedOnCompletion = NO;
 
@@ -690,7 +924,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     CABasicAnimation * transformAnim = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
     transformAnim.fromValue          = @(0);
     transformAnim.toValue            = @(1);
-    transformAnim.duration           = 1.5;
+    transformAnim.duration           = 0.5;
     transformAnim.fillMode = kCAFillModeBoth;
     transformAnim.removedOnCompletion = NO;
 
@@ -716,7 +950,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     CABasicAnimation * opacityAnim = [CABasicAnimation animationWithKeyPath:@"opacity"];
     opacityAnim.fromValue          = @0;
     opacityAnim.toValue            = @1;
-    opacityAnim.duration           = 1.5;
+    opacityAnim.duration           = 0.5;
     opacityAnim.fillMode = kCAFillModeForwards;
     opacityAnim.removedOnCompletion = NO;
 
@@ -757,16 +991,9 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 
     cell.backgroundColor = cell.contentView.backgroundColor;
     cell.outgoingLabel.frame = CGRectMake(66, 8, 268, 30);
-//    UIImage *photo = [self.userPhotos objectAtIndex:indexPath.row];
 
 
     QBChatMessage *messageHistory = [self.messageArray objectAtIndex:indexPath.row];
-
-//    if([messageHistory markable]){
-//        [[QBChat instance] readMessage:messageHistory completion:^(NSError * _Nullable error) {
-//
-//        }];
-//    }
 
     if (messageHistory.senderID == [QBSession currentSession].currentUser.ID) {
         cell.outgoingLabel.text = messageHistory.text;
@@ -780,7 +1007,8 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
         NSString *result = [df stringFromDate:messageHistory.createdAt];
 
         NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-        [formatter setDateFormat:@"HH:mm"];
+        [formatter setTimeStyle:NSDateFormatterFullStyle];
+        [formatter setDateFormat:@"HH:mm a"];
         NSString *startTimeString = [formatter stringFromDate:messageHistory.createdAt];
         cell.timeLabel.text = startTimeString;
 
@@ -793,59 +1021,49 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
             NSString *result = [df stringFromDate:messageHistory.createdAt];
             cell.outgoingMessageTime.text = result;
         }
+        NSUInteger userProfilePictureID = [QBSession currentSession].currentUser.blobID;
+        NSString *privateUrl = [QBCBlob privateUrlForID:userProfilePictureID];
 
-        if (self.currentUserImage == nil) {
-            cell.profileImage.image = [UIImage imageNamed:@"Profile Picture"];
-        } else {
-            cell.profileImage.image = self.currentUserImage;
+        [cell.profileImage sd_setImageWithURL:[NSURL URLWithString:privateUrl]
+                                 placeholderImage:[UIImage imageNamed:@"Profile Picture"]
+                                        completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+
+                                        }];
+
+
+        NSInteger sectionsAmount = [self.tableView numberOfSections];
+        NSInteger rowsAmount = [self.tableView numberOfRowsInSection:[indexPath section]];
+        if ([indexPath section] == sectionsAmount - 1 && [indexPath row] == rowsAmount - 1) {
+
+            [cell.statusIcon.layer addAnimation:[self imageAnimation] forKey:@"imageAnimation"];
+            cell.statusIcon.image = [UIImage imageNamed:@"sentIcon"];
         }
-
-        cell.chosenImage.image = self.imageView.image;
-
-//        NSInteger sectionsAmount = [self.tableView numberOfSections];
-//        NSInteger rowsAmount = [self.tableView numberOfRowsInSection:[indexPath section]];
-//        if ([indexPath section] == sectionsAmount - 1 && [indexPath row] == rowsAmount - 1) {
-//
-//            [cell.statusIcon.layer addAnimation:[self imageAnimation] forKey:@"imageAnimation"];
-//            cell.statusIcon.image = [UIImage imageNamed:@"sentIcon"];
-//        }
 
         return cell;
     } else {
 
         IncomingTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"incomingCell"];
 
-//        if (self.opponentImage == nil) {
-//
-//            cell.profileImageincom.image = [UIImage imageNamed:@"Profile Picture"];
-//        } else {
-//            cell.profileImageincom.image = self.opponentImage;
-//        }
-
         cell.incomingLabel.text = messageHistory.text;
         [messageHistory markable];
         cell.backgroundColor = cell.contentView.backgroundColor;
-//
-//        NSArray *userids = [[NSArray alloc]initWithObjects:@(messageHistory.senderID), nil];
-//        [QBRequest usersWithIDs:userids page:[QBGeneralResponsePage responsePageWithCurrentPage:1 perPage:10] successBlock:^(QBResponse *response, QBGeneralResponsePage *page, NSArray *users) {
-//            for (QBUUser *user in users) {
-//
-//                NSUInteger userProfilePictureID = user.blobID;
-//
-//                [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse * _Nonnull response, NSData * _Nonnull fileData) {
-////
-//                    cell.profileImageincom.image = [UIImage imageWithData:fileData];
-//
-//
-//                } statusBlock:^(QBRequest * _Nonnull request, QBRequestStatus * _Nullable status) {
-//                    nil;
-//                } errorBlock:^(QBResponse * _Nonnull response) {
-//                }];
-//            }
-//
-//        } errorBlock:^(QBResponse *response) {
-//            // Handle error here
-//        }];
+
+        NSArray *userids = [[NSArray alloc]initWithObjects:@(messageHistory.senderID), nil];
+        [QBRequest usersWithIDs:userids page:[QBGeneralResponsePage responsePageWithCurrentPage:1 perPage:10] successBlock:^(QBResponse *response, QBGeneralResponsePage *page, NSArray *users) {
+            for (QBUUser *user in users) {
+
+                NSUInteger userProfilePictureID = user.blobID;
+
+                NSString *privateUrl = [QBCBlob privateUrlForID:userProfilePictureID];
+
+                [cell.profileImageincom sd_setImageWithURL:[NSURL URLWithString:privateUrl]
+                                     placeholderImage:[UIImage imageNamed:@"Profile Picture"]
+                                            completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+
+                                            }];
+            }
+        } errorBlock:^(QBResponse *response) {
+        }];
 
         cell.profileImageincom.image = self.imageForRightBar;
 
@@ -856,7 +1074,9 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
         NSString *result = [df stringFromDate:messageHistory.createdAt];
 
         NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-        [formatter setDateFormat:@"HH:mm"];
+
+        [formatter setTimeStyle:NSDateFormatterFullStyle];
+        [formatter setDateFormat:@"HH:mm a"];
         NSString *startTimeString = [formatter stringFromDate:messageHistory.createdAt];
         cell.timeLabel.text = startTimeString;
 
@@ -902,8 +1122,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 
 
 - (void)chatDidReceiveSystemMessage:(QBChatMessage *)message{
-
-    [[QBChat instance] markAsDelivered:message];
+    [[QBChat instance] markAsDelivered:message completion:nil];
     [self.messageArray addObject:message];
     [self.tableView insertRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:self.messageArray.count -1 inSection:0]] withRowAnimation:UITableViewRowAnimationLeft];
 //    [self.tableView reloadData];
@@ -926,7 +1145,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 }
 - (void)chatDidReadMessageWithID:(NSString *)messageID dialogID:(NSString *)dialogID readerID:(NSUInteger)readerID {
 
-    [SVProgressHUD showSuccessWithStatus:@"message was Read"];
+//    [SVProgressHUD showSuccessWithStatus:@"message was Read"];
 
     OutgointTableViewCell *cell;
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
@@ -942,7 +1161,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 }
 
 - (void)chatDidDeliverMessageWithID:(NSString *)messageID dialogID:(NSString *)dialogID toUserID:(NSUInteger)userId{
-    [SVProgressHUD showSuccessWithStatus:@"message was delivered"];
+//    [SVProgressHUD showSuccessWithStatus:@"message was delivered"];
 
     OutgointTableViewCell *cell;
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
@@ -1054,6 +1273,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     return indexPath;
 
 }
+
 - (QBUUser *)userWithID:(NSNumber *)userID {
 
     NSPredicate *userWithIDPredicate = [NSPredicate predicateWithFormat:@"ID == %@", userID];
@@ -1066,7 +1286,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     block(cell);
 }
 
-
 //Called in case when receive remote video track from opponent
 - (void)session:(QBRTCSession *)session receivedRemoteVideoTrack:(QBRTCVideoTrack *)videoTrack fromUser:(NSNumber *)userID {
 
@@ -1075,7 +1294,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
         _renderer = [[QBRTCSampleBufferRenderer alloc]init];
         QBRTCSampleBufferView *view = (id)self.renderer.rendererView;
         view.videoGravity = AVLayerVideoGravityResizeAspectFill;
-        [self.opponentsView insertSubview:self.renderer.rendererView atIndex:0];
+        [self.opponentsView insertSubview:self.renderer.rendererView atIndex:1];
 
 
         self.renderer.rendererView.frame = self.opponentsView.bounds;
@@ -1128,12 +1347,13 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 -(void)session:(QBRTCSession *)session initializedLocalMediaStream:(QBRTCMediaStream *)mediaStream {
 //    [SVProgressHUD showSuccessWithStatus:@"initialized media stream"];
     self.session.localMediaStream.videoTrack.videoCapture = self.videoCapture;
-
 }
+
 
 -(void)session:(QBRTCSession *)session acceptedByUser:(NSNumber *)userID userInfo:(NSDictionary *)userInfo{
 //    [SVProgressHUD showSuccessWithStatus:@"accepted By User"];
 }
+
 
 -(void)session:(QBRTCSession *)session hungUpByUser:(NSNumber *)userID userInfo:(NSDictionary *)userInfo {
     
@@ -1144,7 +1364,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     [UIView animateWithDuration:1.0 animations:^{
         [self.viewForTableCellFadeEffect layoutIfNeeded];
     }];
-
 }
 
 -(void)session:(QBRTCSession *)session userDidNotRespond:(NSNumber *)userID {
@@ -1206,7 +1425,7 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
 //    [SVProgressHUD showSuccessWithStatus:@"session did close"];
 
     self.session = nil;
-        [self.imageViewBehindBlur.layer addAnimation:[self videoEndedImage] forKey:@"videoEndedImage"];
+    [self.imageViewBehindBlur.layer addAnimation:[self videoEndedImage] forKey:@"videoEndedImage"];
     [self.visulaEffectBlur.layer addAnimation:[self videoEndedBlurr] forKey:@"videoEndedBlurr"];
 
     self.viewForTableViewFadeEffectTopMargin.constant = 169;

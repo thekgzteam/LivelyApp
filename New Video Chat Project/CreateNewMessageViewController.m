@@ -1,17 +1,15 @@
 //
-//  ContactsAndGroups.m
-//  New Video Chat Project
+//  CreateNewMessageViewController.m
+//   
 //
-//  Created by Edil Ashimov on 10/24/15.
+//  Created by Edil Ashimov on 12/24/15.
 //  Copyright © 2015 Edil Ashimov. All rights reserved.
 //
 
-#import "ContactsAndGroups.h"
-#import "ContactsAndGroupsTableViewCell.h"
+#import "CreateNewMessageViewController.h"
 #import <UIImageView+WebCache.h>
+#import "CreateMessageTableViewCell.h"
 
-
-#import "SWRevealViewController.h"
 #import <Quickblox/Quickblox.h>
 #import "SVProgressHUD.h"
 #import "PresentingAnimationController.h"
@@ -27,8 +25,8 @@
 #import <FBSDKGraphRequest.h>
 
 
-@interface ContactsAndGroups () <UITableViewDelegate, UITableViewDataSource, NMPaginatorDelegate,FBSDKGraphRequestConnectionDelegate, ABNewPersonViewControllerDelegate>
 
+@interface CreateNewMessageViewController () <UITableViewDelegate, UITableViewDataSource, NMPaginatorDelegate,FBSDKGraphRequestConnectionDelegate, ABNewPersonViewControllerDelegate>
 
 
 @property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
@@ -59,7 +57,7 @@
 
 @end
 
-@implementation ContactsAndGroups
+@implementation CreateNewMessageViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -71,9 +69,9 @@
     UIImage *blank = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     [self.segmentedControl setDividerImage:blank
-                forLeftSegmentState:UIControlStateNormal
-                  rightSegmentState:UIControlStateNormal
-                         barMetrics:UIBarMetricsDefault];
+                       forLeftSegmentState:UIControlStateNormal
+                         rightSegmentState:UIControlStateNormal
+                                barMetrics:UIBarMetricsDefault];
 
     self.footerLabel.backgroundColor = [UIColor colorWithRed:137/255.0f green:196/255.0f blue:244/255.0f alpha:1.0];
     self.navBar.barTintColor = [UIColor colorWithRed:103/255.0f green:128/255.0f blue:159/255.0f alpha:1.0];
@@ -83,7 +81,7 @@
     self.segmentedControl.backgroundColor = [UIColor clearColor];
     self.searchBar.backgroundImage = [[UIImage alloc] init];
 
-   self.searchBar.backgroundColor = [UIColor colorWithRed:103/255.0f green:128/255.0f blue:159/255.0f alpha:1.0];
+    self.searchBar.backgroundColor = [UIColor colorWithRed:103/255.0f green:128/255.0f blue:159/255.0f alpha:1.0];
     self.tableView.backgroundColor = [UIColor colorWithRed:103/255.0f green:128/255.0f blue:159/255.0f alpha:1.0];
     self.view.backgroundColor = [UIColor colorWithRed:103/255.0f green:128/255.0f blue:159/255.0f alpha:1.0];
 
@@ -95,18 +93,6 @@
 
     QBUUser *userEdilAshimov;
     userEdilAshimov.ID = 6639323;
-
-    // REMOVING CURRENT USER FROM LIST OF ALL FETCHED USERS
-    [[Storage instance].users removeObject:[QBSession currentSession].currentUser];
-//    for ( userEdilAshimov in [Storage instance].users) {
-//        if ([[Storage instance].users mutableCopy] containsObject:userEdilAshimov) {
-//            <#statements#>
-//        }
-//        [[[Storage instance].users mutableCopy]  removeObject:userEdilAshimov];
-//    }
-    [[Storage instance].users removeObject:userEdilAshimov];
-
-
 
     // LOCAL CONTACT LIST
     self.groupOfContacts = [@[] mutableCopy];
@@ -122,7 +108,7 @@
 
 
     // INITIALIZING ARRAYS WITH DICTIONARIES
-       if (!self.groups) {
+    if (!self.groups) {
         self.groups = [NSMutableArray arrayWithObjects:@"Friends", @"Family", @"Work", nil];
     }
 
@@ -132,10 +118,10 @@
 
     if (!self.arrayForBool) {
         self.arrayForBool    = [NSMutableArray arrayWithObjects:[NSNumber numberWithBool:NO],
-                           [NSNumber numberWithBool:NO],
-                           [NSNumber numberWithBool:NO],
-                           [NSNumber numberWithBool:NO],
-                           [NSNumber numberWithBool:NO] , nil];
+                                [NSNumber numberWithBool:NO],
+                                [NSNumber numberWithBool:NO],
+                                [NSNumber numberWithBool:NO],
+                                [NSNumber numberWithBool:NO] , nil];
     }
 
     if (!self.sectionContentDict) {
@@ -170,6 +156,10 @@
     [self.tableView reloadData];
 
 }
+- (IBAction)dismissButton:(id)sender {
+
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
 
 - (UIImage *)imageWithColor:(UIColor *)color {
     CGRect rect = CGRectMake(0.0f, 0.0f, 1.0f, 1.0f);
@@ -185,19 +175,16 @@
     return image;
 }
 
--(void)newPersonViewController:(ABNewPersonViewController *)newPersonView didCompleteWithNewPerson:(ABRecordRef)person {
+- (void)newPersonViewController:(ABNewPersonViewController *)newPersonView didCompleteWithNewPerson:(ABRecordRef)person {
 
     [newPersonView dismissViewControllerAnimated:YES completion:nil];
-
-
 }
 
 - (BOOL) shouldRemovePresentersView {
     return YES;
 }
 
-
--(void) perform:(id)sender {
+- (void) perform:(id)sender {
 
     [self dismissViewControllerAnimated:YES completion:^{
     }];
@@ -210,7 +197,7 @@
 
     // QUESTION 16
 
-//    self.addressBookController = [[ABNewPersonViewController alloc] init];
+    //    self.addressBookController = [[ABNewPersonViewController alloc] init];
 
     ABNewPersonViewController *addressBookController =[[ABNewPersonViewController alloc] init];
 
@@ -252,7 +239,7 @@
 }
 
 
-    // SEGMENT CONTROL MEHTOD
+// SEGMENT CONTROL MEHTOD
 - (IBAction)segmentedControlChanged:(UISegmentedControl*)sender {
     switch (sender.selectedSegmentIndex) {
         case 0:
@@ -274,7 +261,7 @@
             return  self.groups2.count;
             break;
 
-            case 1:
+        case 1:
             return self.groups.count;
             break;
     }
@@ -287,13 +274,13 @@
         case 0:
             if ([[self.arrayForBool objectAtIndex:section] boolValue]) {
                 return [[self.sectionContentDict2 valueForKey:[self.groups2 objectAtIndex:section]] count];
-            break;
-        case 1:
-            if ([[self.arrayForBool objectAtIndex:section] boolValue]) {
-                return [[self.sectionContentDict valueForKey:[self.groups objectAtIndex:section]] count];
                 break;
+            case 1:
+                if ([[self.arrayForBool objectAtIndex:section] boolValue]) {
+                    return [[self.sectionContentDict valueForKey:[self.groups objectAtIndex:section]] count];
+                    break;
+                }
             }
-        }
     }
     return  0;
 }
@@ -305,10 +292,10 @@
     tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
     headerView.tag                  = section;
     headerView.backgroundColor      = [UIColor colorWithRed:103/255.0f green:128/255.0f blue:159/255.0f alpha:1.0];
-//    CAGradientLayer *gradient = [CAGradientLayer layer];
-//    gradient.frame = headerView.bounds;
-//    gradient.colors = [NSArray arrayWithObjects:(id)[[UIColor whiteColor] CGColor], (id)[[UIColor blackColor] CGColor], nil];
-//    [headerView.layer insertSublayer:gradient atIndex:0];
+    //    CAGradientLayer *gradient = [CAGradientLayer layer];
+    //    gradient.frame = headerView.bounds;
+    //    gradient.colors = [NSArray arrayWithObjects:(id)[[UIColor whiteColor] CGColor], (id)[[UIColor blackColor] CGColor], nil];
+    //    [headerView.layer insertSublayer:gradient atIndex:0];
 
 
     UILabel *headerString           = [[UILabel alloc] initWithFrame:CGRectMake(10, 0, self.view.frame.size.width-20-50, 50)];
@@ -330,27 +317,27 @@
                     headerString.textColor          = [UIColor colorWithRed:233/255.0f green:212/255.0f blue:96/255.0f alpha:1.0];
                     [headerString setShadowOffset:CGSizeMake(1, 0.7)];
 
-            }
+                }
                 headerString.textAlignment      = NSTextAlignmentLeft;
                 [headerView addSubview:headerString];
                 break;
             }
-            case 1:
-                if(self.segmentedControl.selectedSegmentIndex == 1) {
-                    
-                    if (!manyCells) {
-                        headerString.text = [self.groups objectAtIndex:section];
-                        headerString.textColor          = [UIColor blackColor];
+        case 1:
+            if(self.segmentedControl.selectedSegmentIndex == 1) {
 
-                    }else{
-                        headerString.text = [self.groups objectAtIndex:section];
-                        headerString.textColor          = [UIColor blueColor];
+                if (!manyCells) {
+                    headerString.text = [self.groups objectAtIndex:section];
+                    headerString.textColor          = [UIColor blackColor];
+
+                }else{
+                    headerString.text = [self.groups objectAtIndex:section];
+                    headerString.textColor          = [UIColor blueColor];
                 }
-                    headerString.textAlignment      = NSTextAlignmentLeft;
-                    [headerView addSubview:headerString];
-                    break;
-                }
-        }
+                headerString.textAlignment      = NSTextAlignmentLeft;
+                [headerView addSubview:headerString];
+                break;
+            }
+    }
 
     // GESTURE RECOGNIZER FOR HEADER VIEW TAPPING
     UITapGestureRecognizer  *headerTapped   = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(sectionHeaderTapped:)];
@@ -386,9 +373,10 @@
     return 2;
 }
 
+
 - (UITableViewCell *)tableView: (UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 
-    ContactsAndGroupsTableViewCell *cell =[tableView dequeueReusableCellWithIdentifier:@"contactscellid"];
+    CreateMessageTableViewCell *cell =[tableView dequeueReusableCellWithIdentifier:@"contactscellid"];
 
     cell.backgroundView.backgroundColor = [UIColor colorWithRed:238/255.0f green:238/255.0f blue:238/255.0f alpha:1.0];
     cell.backgroundColor = [UIColor colorWithRed:103/255.0f green:128/255.0f blue:159/255.0f alpha:1.0];
@@ -404,74 +392,44 @@
             case 0:{
                 QBUUser *user = [content2 objectAtIndex:indexPath.row];
                 cell.contactsName.text = user.fullName;
-                  NSUInteger userProfilePictureID = user.blobID;
+                NSUInteger userProfilePictureID = user.blobID;
 
                 NSString *privateUrl = [QBCBlob privateUrlForID:userProfilePictureID];
                 NSLog(@"---url----%@--------url----", privateUrl);
 
                 [cell.contactsImage sd_setImageWithURL:[NSURL URLWithString:privateUrl]
-                                     placeholderImage:[UIImage imageNamed:@"Profile Picture-1"]
-                                            completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
-                                            }];
+                                      placeholderImage:[UIImage imageNamed:@"Profile Picture-1"]
+                                             completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+                                             }];
 
-                NSInteger currentTimeInterval = [[NSDate date] timeIntervalSince1970];
-                NSInteger userLastRequestAtTimeInterval   = [[user lastRequestAt] timeIntervalSince1970];
-
-                if((currentTimeInterval - userLastRequestAtTimeInterval) < 120){
-                    cell.userOnlineIndicatorLabel.enabled = YES;
-                    cell.userOnlineIndicatorLabel.hidden = NO;
-        [cell.userOnlineIndicatorLabel.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
-                }
             }
                 break;
             case 1: {
                 CNContact *contact = [content2 objectAtIndex:indexPath.row];
                 cell.contactsName.text = contact.givenName;
-                cell.userOnlineIndicatorLabel.enabled = NO;
-                cell.userOnlineIndicatorLabel.hidden = YES;
+
 
                 if (contact.imageData == nil) {
                     cell.contactsImage.image = [UIImage imageNamed:@"Profile Picture-1"];
                 }
                 else
-                cell.contactsImage.image = [UIImage imageWithData:contact.imageData];
-                cell.userOnlineIndicatorLabel.enabled = NO;
-                cell.userOnlineIndicatorLabel.hidden = YES;
+                    cell.contactsImage.image = [UIImage imageWithData:contact.imageData];
+
             }
                 break;
             case 2:
-//            {
-//                QBUUser *user = [content2 objectAtIndex:indexPath.row];
-//                cell.contactsName.text = user.fullName;
-//            }
+                //            {
+                //                QBUUser *user = [content2 objectAtIndex:indexPath.row];
+                //                cell.contactsName.text = user.fullName;
+                //            }
                 break;
             default:
                 break;
         }
     }
     return cell;
-
-
-//        NSArray *content3 = [self.sectionContentDict2 valueForKey:[self.groups2 objectAtIndex:indexPath.section]];
-//
-//        QBUUser *user = [content2 objectAtIndex:indexPath.row];
-//
-//        cell.contactsName.text = user.fullName;
-//        cell.contactsName.text = contact.givenName;
-//        cell.contactsImage.image =[UIImage imageNamed:@"Profile Picture"];
-//
-//        return cell;
-//      } else {
-//
-//        GroupCroupsCell *groupCell = [tableView dequeueReusableCellWithIdentifier:@"groupsCellId"];
-//
-//        NSArray *content = [self.sectionContentDict valueForKey:[self.groups objectAtIndex:indexPath.section]];
-//        groupCell.username.text = [content objectAtIndex:indexPath.row];
-//
-//    return groupCell;
-//
-//    }
 }
+
 
 #pragma mark - user interaction -
 
@@ -485,31 +443,31 @@
     [SVProgressHUD dismiss];
 }
 
-    // ACTION TO SHOW SELECTED USER PROFILE
+// ACTION TO SHOW SELECTED USER PROFILE
 - (IBAction)showUserPage {
 
     UserProfileViewController *modalVC = [self.storyboard instantiateViewControllerWithIdentifier:@"userProfilePage"];
     modalVC.transitioningDelegate = self;
     modalVC.modalPresentationStyle = UIModalPresentationCustom;
     NSIndexPath *selectedIndexPath = [self.tableView indexPathForSelectedRow];
-    ContactsAndGroupsTableViewCell *cell = [self.tableView cellForRowAtIndexPath:selectedIndexPath];
+    CreateMessageTableViewCell *cell = [self.tableView cellForRowAtIndexPath:selectedIndexPath];
     modalVC.userFullName = cell.contactsName.text;
     modalVC.userImage = cell.contactsImage.image;
 
     [self presentViewController:modalVC animated:YES completion:nil];
 }
 
-    // SEGUES
+// SEGUES
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     if ([segue.identifier isEqualToString:@"userProfileSeg"]){
         NSIndexPath *selectedIndexPath = [self.tableView indexPathForSelectedRow];
-        ContactsAndGroupsTableViewCell *cell = [self.tableView cellForRowAtIndexPath:selectedIndexPath];
+        CreateMessageTableViewCell *cell = [self.tableView cellForRowAtIndexPath:selectedIndexPath];
         UserProfileViewController *dvc = segue.destinationViewController;
         dvc.userFullName = cell.contactsName.text;
     }
 }
 
-    // GESTURE RECOGNIZER FOR HEADER VIEW TAPPED
+// GESTURE RECOGNIZER FOR HEADER VIEW TAPPED
 - (void)sectionHeaderTapped:(UITapGestureRecognizer *)gestureRecognizer {
 
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:gestureRecognizer.view.tag];
@@ -555,3 +513,4 @@
 
 
 @end
+

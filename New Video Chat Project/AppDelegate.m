@@ -113,14 +113,11 @@ if ([[vComp objectAtIndex:0] intValue] >= 8) {
 #endif
 }
 - (void)applicationWillTerminate:(UIApplication *)application {
-//    [[QBChat instance] disconnectWithCompletionBlock:^(NSError * _Nullable error) {
-//    }];
+
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
-//    [[QBChat instance] disconnectWithCompletionBlock:^(NSError * _Nullable error) {
-//
-//    }];
+
 }
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {

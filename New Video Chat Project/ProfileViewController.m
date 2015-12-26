@@ -12,11 +12,13 @@
 #import "DismissingAnimationController.h"
 #import <Quickblox/Quickblox.h>
 #import "SVProgressHUD.h"
+#import <QuartzCore/QuartzCore.h>
 
 #import "ProfileSettingsViewController.h"
 #import "RegistrationViewController.h"
 #import <MessageUI/MessageUI.h>
 #import <MessageUI/MFMailComposeViewController.h>
+#import <UIImageView+WebCache.h>
 
 
 
@@ -29,7 +31,6 @@
 @property (weak, nonatomic) IBOutlet UIButton *logOutButton;
 @property (weak, nonatomic) IBOutlet UIButton *shareButton;
 @property (weak, nonatomic) IBOutlet UIButton *sendFeedbackButton;
-@property (weak, nonatomic) IBOutlet UIButton *helpButton;
 @property (weak, nonatomic) IBOutlet UIButton *legalButton;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 
@@ -41,20 +42,87 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
+    self.shareButton.titleLabel.layer.shadowColor = [UIColor grayColor].CGColor;
+    self.shareButton.titleLabel.layer.shadowOpacity = 0.5;
+    self.shareButton.titleLabel.layer.shadowRadius = 1;
+    self.shareButton.titleLabel.layer.shadowOffset = CGSizeMake(2.0f,2.0f);
+
+    self.sendFeedbackButton.titleLabel.layer.shadowColor = [UIColor grayColor].CGColor;
+    self.sendFeedbackButton.titleLabel.layer.shadowOpacity = 0.5;
+    self.sendFeedbackButton.titleLabel.layer.shadowRadius = 1;
+    self.sendFeedbackButton.titleLabel.layer.shadowOffset = CGSizeMake(2.0f,2.0f);
+
+    self.legalButton.titleLabel.layer.shadowColor = [UIColor grayColor].CGColor;
+    self.legalButton.titleLabel.layer.shadowOpacity = 0.5;
+    self.legalButton.titleLabel.layer.shadowRadius = 1;
+    self.legalButton.titleLabel.layer.shadowOffset = CGSizeMake(2.0f,2.0f);
+
+    self.logOutButton.titleLabel.layer.shadowColor = [UIColor grayColor].CGColor;
+    self.logOutButton.titleLabel.layer.shadowOpacity = 0.5;
+    self.logOutButton.titleLabel.layer.shadowRadius = 1;
+    self.logOutButton.titleLabel.layer.shadowOffset = CGSizeMake(2.0f,2.0f);
+
+    self.profileName.layer.shadowColor = [UIColor grayColor].CGColor;
+    self.profileName.layer.shadowOpacity = 0.5;
+    self.profileName.layer.shadowRadius = 1;
+    self.profileName.layer.shadowOffset = CGSizeMake(2.0f,2.0f);
+
+    self.profilePic.layer.shadowColor = [UIColor whiteColor].CGColor;
+    self.profilePic.layer.shadowOpacity = 0.5;
+    self.profilePic.layer.shadowRadius = 5;
+    self.profilePic.layer.shadowOffset = CGSizeMake(4.0f,4.0f);
+
+    self.profileDescription.layer.shadowColor = [UIColor whiteColor].CGColor;
+    self.profileDescription.layer.shadowOpacity = 0.5;
+    self.profileDescription.layer.shadowRadius = 3;
+    self.profileDescription.layer.shadowOffset = CGSizeMake(3.0f,3.0f);
+
+    self.profileDescription.layer.borderColor = [[UIColor whiteColor] CGColor];
+    self.profileDescription.layer.borderWidth = 0.2;
+    self.profileDescription.layer.cornerRadius = 18;
+    self.profileDescription.layer.masksToBounds = YES;
+
+    self.profilePic.layer.cornerRadius = 60;
+    self.profilePic.layer.masksToBounds = YES;
+    self.profilePic.layer.borderColor=[[UIColor whiteColor] CGColor];
+    self.profilePic.layer.borderWidth = 2.0f;
+
+
+
+    self.logOutButton.layer.cornerRadius = 70;
+    self.logOutButton.layer.masksToBounds = YES;
+
+
+
+
+
+
+
+
+    // Create the colors
+    UIColor *bottomColor = [UIColor colorWithRed:54/255.0 green:159/255.0 blue:151/255.0 alpha:1.0];
+    UIColor *topColor = [UIColor colorWithRed:67/255.0 green:220/255.0 blue:204/255.0 alpha:1.0];
+
+    // Create the gradient
+    CAGradientLayer *theViewGradient = [CAGradientLayer layer];
+    theViewGradient.colors = [NSArray arrayWithObjects: (id)topColor.CGColor, (id)bottomColor.CGColor,  nil];
+    theViewGradient.frame = self.view.bounds;
+
+    //Add gradient to view
+    [self.view.layer insertSublayer:theViewGradient atIndex:0];
+
     NSUInteger userProfilePictureID = [QBSession currentSession].currentUser.blobID;
-    [QBRequest downloadFileWithID:userProfilePictureID successBlock:^(QBResponse *  response, NSData *fileData) {
-        NSLog(@"--------%@------",fileData);
+    NSString *privateUrl = [QBCBlob privateUrlForID:userProfilePictureID];
 
-        self.activityIndicator.hidden = YES;
-        [self.activityIndicator stopAnimating];
-        self.profilePic.image = [UIImage imageWithData:fileData];
-    } statusBlock:^(QBRequest *  request, QBRequestStatus *  status) {
-        NSLog(@"--------%@------",status.description);
-
-
-    } errorBlock:^(QBResponse *  response) {
-        NSLog(@"--------%@------",response.error);
-    }];
+    [self.profilePic sd_setImageWithURL:[NSURL URLWithString:privateUrl]
+                       placeholderImage:[UIImage imageNamed:@"Profile Picture"]
+                              completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, NSURL *imageURL) {
+                                  if (error != nil) {
+                                      NSLog(@"---%@---", error.localizedDescription);
+                                }
+                                  self.activityIndicator.hidden = YES;
+                                  [self.activityIndicator stopAnimating];
+                              }];
 
 
     [QBRequest userWithID:[QBSession currentSession].currentUser.ID successBlock:^(QBResponse *response, QBUUser *user) {
@@ -71,21 +139,7 @@
     } errorBlock:^(QBResponse *response) {
     }];
 
-
-    self.profilePic.layer.cornerRadius = 60;
-    self.profilePic.layer.masksToBounds = YES;
-    self.profilePic.layer.borderColor=[[UIColor whiteColor] CGColor];
-    self.profilePic.layer.borderWidth = 4.0f;
-
-    self.profileDescription.layer.cornerRadius = 18;
-    self.profileDescription.layer.masksToBounds = YES;
-
-    self.logOutButton.layer.cornerRadius = 70;
-    self.logOutButton.layer.masksToBounds = YES;
-
-
-
-}
+    }
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:YES];
@@ -95,32 +149,27 @@
     [self.profileDescription.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
     [self.shareButton.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
     [self.sendFeedbackButton.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
-    [self.helpButton.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
+
     [self.legalButton.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
     [self.logOutButton.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
     [self.settingsButton.layer addAnimation:[self ovalAnimation] forKey:@"ovalAnimation"];
-
     [self.profileDescription.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
     [self.shareButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
     [self.sendFeedbackButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
-    [self.helpButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
+
     [self.legalButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
     [self.logOutButton.layer addAnimation:[self ovalAnimationOpacity] forKey:@"ovalAnimationOpacity"];
     [self.settingsButton.layer addAnimation:[self rotationAnimation] forKey:@"rotationAnimation"];
-
 }
 
 
 -(void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
 
-
     self.activityIndicator.hidden = NO;
     [self.activityIndicator startAnimating];
 
-
-   }
-
+}
 
 - (IBAction)didClickOnPresent:(id)sender {
 
@@ -165,14 +214,14 @@
                                                                              applicationActivities:nil];
     //if iPhone
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-    [self presentViewController:activityVC animated:YES completion:nil];
-}
+        [self presentViewController:activityVC animated:YES completion:nil];
+    }
 
-//if iPad
-else {
-    // Change Rect to position Popover
-    UIPopoverController *popup = [[UIPopoverController alloc] initWithContentViewController:activityVC];
-    [popup presentPopoverFromRect:CGRectMake(self.view.frame.size.width/2, self.view.frame.size.height/4, 0, 0)inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+    //if iPad
+    else {
+        // Change Rect to position Popover
+        UIPopoverController *popup = [[UIPopoverController alloc] initWithContentViewController:activityVC];
+        [popup presentPopoverFromRect:CGRectMake(self.view.frame.size.width/2, self.view.frame.size.height/4, 0, 0)inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
     }
 }
 #pragma mark - UIViewControllerTransitionDelegate -
@@ -189,12 +238,12 @@ else {
 
     [QBRequest logOutWithSuccessBlock:^(QBResponse *response) {
         // Successful logout
-//        [SVProgressHUD showSuccessWithStatus:@"Signed Out"];
+        //        [SVProgressHUD showSuccessWithStatus:@"Signed Out"];
 
         [self performSegueWithIdentifier:@"logoutSeg" sender:nil];
 
     } errorBlock:^(QBResponse *response) {
-//        [SVProgressHUD showErrorWithStatus:@"Error Signing Out"];
+        //        [SVProgressHUD showErrorWithStatus:@"Error Signing Out"];
     }];
 }
 
@@ -226,7 +275,7 @@ else {
     transformAnim.duration           = 0.435;
     transformAnim.fillMode = kCAFillModeBoth;
     transformAnim.removedOnCompletion = NO;
-
+    
     return transformAnim;
 }
 

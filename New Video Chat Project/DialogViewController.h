@@ -13,11 +13,22 @@
 #import <QuartzCore/QuartzCore.h>
 #import "ContentView.h"
 
+
+@protocol DialogViewControllerDelegate <NSObject>
+
+- (void)secondViewScreenControllerDidPressCancelButton:(UIViewController *)viewController sender:(id)sender;
+
+// Any other button possibilities
+
+@end
+
 @class QBRTCSession;
 
 @interface DialogViewController : UIViewController <UITextViewDelegate, UITableViewDataSource, UITableViewDelegate>
 
-@property UIImage *currentUserImage;
+
+@property (weak, nonatomic) id<DialogViewControllerDelegate> delegate;
+@property UIImageView *currentUserImage;
 @property (weak, nonatomic) IBOutlet ContentView *contentView;
 @property UIImage *imageForRightBar;
 @property (weak, nonatomic) IBOutlet UIButton *takePicButton;
