@@ -240,11 +240,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     [self.videoCapture startSession];
     [self.myScreen.layer insertSublayer:self.videoCapture.previewLayer atIndex:0];
 
-    UITapGestureRecognizer *tapRecognizer2 = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(visualEffectTapped2:)];
-    tapRecognizer2.numberOfTapsRequired = 1;
-    [self.myScreen addGestureRecognizer:tapRecognizer2];
-
-
 
     self.videoCapture.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
 //    self.myScreen.backgroundColor = [UIColor clearColor];
@@ -875,9 +870,6 @@ NSString *const kOpponentCollectionViewCellIdentifier = @"OpponentCollectionView
     [self.view resignFirstResponder];
     [self resignFirstResponder];
 }
-- (void)visualEffectTapped2:(UITapGestureRecognizer *)recognizer2 {
-        [self enableSpeakers];
-       }
 
 #pragma mark -
 #pragma mark UI ANIMATION METHODS

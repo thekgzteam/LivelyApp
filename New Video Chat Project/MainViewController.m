@@ -475,6 +475,10 @@
         self.currentSession = session;
         self.sessionToAccept = session;
         
+        __weak typeof(self)weakSelf = self;
+
+        [QBRequest sendPushWithText:[[weakSelf senderDisplayName] stringByAppendingString:@" is Live 🎥 "] toUsers:[opponentsIDs description] successBlock:nil errorBlock:^(QBError *error) {
+        }];
         [self performSegueWithIdentifier:@"openDialogSeg" sender:self];
     }
     else {

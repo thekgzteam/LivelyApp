@@ -6,10 +6,13 @@
 target 'New Video Chat Project' do
  pod 'QuickBlox'
  pod 'Quickblox-WebRTC'
-  pod 'FBSDKLoginKit'
   pod 'SinchVerification'
   pod 'SVProgressHUD'
   pod 'SDWebImage', '~>3.7'
+  pod 'FBSDKCoreKit'
+  pod 'FBSDKLoginKit'
+  pod 'FBSDKShareKit'
+  
 
 end
 

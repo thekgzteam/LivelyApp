@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface RegistrationViewController : UIViewController <UIViewControllerTransitioningDelegate>
+@interface RegistrationViewController : UIViewController <UIViewControllerTransitioningDelegate, UITextFieldDelegate>
 
 @property (weak, nonatomic) IBOutlet UITextField *phoneNumber;
 @property (weak, nonatomic) IBOutlet UILabel *status;

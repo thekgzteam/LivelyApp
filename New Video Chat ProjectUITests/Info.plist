@@ -18,7 +18,27 @@
 	<string>1.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb1689275178017901${FB_SCHEME}</string>
+			</array>
+		</dict>
+	</array>
+	<key>FacebookAppID</key>
+	<string>1689275178017901</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>FacebookDisplayName</key>
+	<string>Lively</string>
+	<key>FacebookUrlSchemeSuffix</key>
+	<string>${FB_SCHEME}</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

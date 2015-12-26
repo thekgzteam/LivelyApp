@@ -53,6 +53,8 @@
 @property (nonatomic, strong) CNContactViewController *newconctact;
 @property (nonatomic, strong) ABNewPersonViewController *addressBookController;
 @property (strong, nonatomic) UINavigationController *nav;
+@property (weak, nonatomic) IBOutlet FBSDKLoginButton *loginButton;
+
 
 
 

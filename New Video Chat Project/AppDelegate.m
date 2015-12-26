@@ -12,6 +12,8 @@
 #import "SVProgressHUD.h"
 #import <QuickbloxWebRTC/QuickbloxWebRTC.h>
 #import <SinchVerification/SinchVerification.h>
+#import <FBSDKCoreKit/FBSDKCoreKit.h>
+
 
 
 @interface AppDelegate ()
@@ -25,6 +27,16 @@ const NSTimeInterval kQBAnswerTimeInterval = 1000.f;
 const NSTimeInterval kQBRTCDisconnectTimeInterval = 30.f;
 const NSTimeInterval kQBDialingTimeInterval = 1000.f;
 
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+  sourceApplication:(NSString *)sourceApplication
+         annotation:(id)annotation {
+    return [[FBSDKApplicationDelegate sharedInstance] application:application
+                                                          openURL:url
+                                                sourceApplication:sourceApplication
+                                                       annotation:annotation];
+}
+
 -(NSUInteger)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
 {
     if(self.restrictRotation)
@@ -35,7 +47,11 @@ const NSTimeInterval kQBDialingTimeInterval = 1000.f;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
+    self.window.backgroundColor = [UIColor whiteColor];
 
+
+    [[FBSDKApplicationDelegate sharedInstance] application:application
+                             didFinishLaunchingWithOptions:launchOptions];
 
     [QBSettings setApplicationID:30638];
     [QBSettings setAuthKey:@"Ab7jmnDcEB3KSVH"];
@@ -43,6 +59,7 @@ const NSTimeInterval kQBDialingTimeInterval = 1000.f;
     [QBSettings setAccountKey:@"7yvNe17TnjNUqDoPwfqp"];
     [QBSettings setAutoReconnectEnabled:YES];
     [QBSettings setLogLevel:QBLogLevelDebug];
+    [FBSDKSettings setAppID:@"1689275178017901"];
 
 
     // Is user is signed in proceed to MainVC
@@ -60,7 +77,7 @@ const NSTimeInterval kQBDialingTimeInterval = 1000.f;
     self.window.rootViewController = initialVC;
     [self.window makeKeyAndVisible];
    
-     [QBSettings setLogLevel:QBLogLevelNothing];
+//     [QBSettings setLogLevel:QBLogLevelNothing];
 
     //QuickbloxWebRTC preferences
 
@@ -68,10 +85,11 @@ const NSTimeInterval kQBDialingTimeInterval = 1000.f;
     [QBRTCConfig setDisconnectTimeInterval:kQBRTCDisconnectTimeInterval];
     [QBRTCConfig setDialingTimeInterval:kQBDialingTimeInterval];
     [QBRTCClient initializeRTC];
-    [QBSettings setLogLevel:QBLogLevelNothing];
+//    [QBSettings setLogLevel:QBLogLevelNothing];
     NSArray *vComp = [[UIDevice currentDevice].systemVersion componentsSeparatedByString:@"."];
 
 if ([[vComp objectAtIndex:0] intValue] >= 8) {
+
     [[UIApplication sharedApplication] registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeBadge|UIUserNotificationTypeSound|UIUserNotificationActivationModeBackground categories:nil]];
 }
     return YES;
@@ -117,11 +135,12 @@ if ([[vComp objectAtIndex:0] intValue] >= 8) {
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
+    [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
 
 }
-- (void)applicationDidBecomeActive:(UIApplication *)application
-{
-  
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    [FBSDKAppEvents activateApp];
+
 }
 - (void)applicationWillEnterForeground:(UIApplication *)application {
     [[QBChat instance] connectWithUser:[QBSession currentSession].currentUser completion:^(NSError * _Nullable error) {
